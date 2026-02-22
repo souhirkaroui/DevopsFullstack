@@ -1,9 +1,12 @@
-FROM node:18 as build
+# Étape 1 : Build Angular
+FROM node:18 AS build
 WORKDIR /app
 COPY . .
-RUN npm install
-RUN npm run build --prod
+RUN npm install && npm run build
 
-FROM nginx:alpine
+# Étape 2 : Serveur Nginx pour Angular
+FROM nginx:latest
+COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist/frontend /usr/share/nginx/html
-EXPOSE 80
+EXPOSE 8080
+CMD ["nginx", "-g", "daemon off;"]
