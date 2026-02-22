@@ -1,0 +1,21 @@
+# ================= Angular =================
+frontend-souhir/node_modules/
+frontend-souhir/dist/
+frontend-souhir/.env
+frontend-souhir/.angular/
+
+# ================= Spring Boot =================
+backend-souhir/target/
+backend-souhir/*.log
+backend-souhir/*.jar
+backend-souhir/*.war
+backend-souhir/.idea/
+backend-souhir/.mvn/wrapper/maven-wrapper.properties
+
+# ================= Base de données =================
+# Si tu veux partager le SQL, laisse décommenté
+database/*.sql
+
+# ================= Système =================
+*.DS_Store
+*.Thumbs.db
