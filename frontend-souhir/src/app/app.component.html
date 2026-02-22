@@ -1,0 +1,24 @@
+<h2>Customer List</h2>
+
+<form (ngSubmit)="addCustomer()" class="customer-form" #customerForm="ngForm">
+  <mat-form-field appearance="outline">
+    <mat-label>Name</mat-label>
+    <input matInput type="text" [(ngModel)]="newCustomer.name" name="name" required>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Email</mat-label>
+    <input matInput type="email" [(ngModel)]="newCustomer.email" name="email" required>
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" type="submit" [disabled]="!customerForm.form.valid">
+    Add
+  </button>
+</form>
+
+<ul class="customer-list">
+  <li *ngFor="let customer of customers">
+    {{customer.name}} - {{customer.email}}
+    <button mat-stroked-button color="warn" (click)="deleteCustomer(customer.id)">Delete</button>
+  </li>
+</ul>
