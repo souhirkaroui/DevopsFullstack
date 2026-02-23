@@ -35,7 +35,7 @@ pipeline {
             steps {
                 script {
                     dir('frontend-souhir') {
-                        withDockerRegistry(credentialsId: 'docker', url: "") {
+                        withDockerRegistry(credentialsId: 'DockerHub', url: 'https://index.docker.io/v1/') {
                             sh 'docker build -t souhirkaroui/frontend-souhir .'
                             sh 'docker tag souhirkaroui/frontend-souhir souhirks/frontend'
                             sh 'docker push souhirks/frontend'
@@ -50,7 +50,7 @@ pipeline {
             steps {
                 script {
                     dir('backend-souhir') {
-                        withDockerRegistry(credentialsId: 'docker', url: "") {
+                        withDockerRegistry(credentialsId: 'DockerHub', url: 'https://index.docker.io/v1/') {
                             sh 'docker build -t souhirkaroui/backend-souhir .'
                             sh 'docker tag souhirkaroui/backend-souhir souhirks/backend'
                             sh 'docker push souhirks/backend'
