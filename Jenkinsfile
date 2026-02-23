@@ -30,6 +30,21 @@ pipeline {
                 }
             }
         }
+        stage('Test Frontend') {
+            steps {
+                dir('frontend-souhir') {
+                    sh 'npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox'
+                }
+            }
+        }
+
+        stage('Build Frontend') {
+            steps {
+                dir('frontend-souhir') {
+                    sh 'ng build --configuration production'
+                }
+            }
+        }
 
         stage('Docker Build & Push Frontend') {
             steps {
