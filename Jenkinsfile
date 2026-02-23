@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-               git branch: 'main', credentialsId: 'github', url: 'git@github.com:souhirkaroui/DevopsFullstack.git'
+               git branch: 'main', credentialsId: 'git', url: 'git@github.com:souhirkaroui/DevopsFullstack.git'
                sh 'ls -lah'  // Vérifier si le code est bien cloné
              }
         }
