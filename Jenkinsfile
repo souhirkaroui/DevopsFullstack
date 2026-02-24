@@ -78,8 +78,8 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
-    steps {
-        withKubeConfig([credentialsId: 'kubeconfig']) { 
+         steps {
+           withKubeConfig([credentialsId: 'kubeconfig']) { 
             script {
                 // On se place dans le dossier backend pour appliquer tous les YAML existants
                 dir('backend-souhir') {
@@ -103,7 +103,7 @@ pipeline {
                 sh 'kubectl rollout status deployment frontend-deployment -n default'
             }
         }
-    }
-}
-    }
+      }
+   }
+ }
 }
