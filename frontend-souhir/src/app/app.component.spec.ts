@@ -5,17 +5,17 @@ import { CustomerService, Customer } from './customer.service';
 import { of } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 
-// Mock correctement typé pour CustomerService
-const customerServiceMock = {
-  getCustomers: () => of([] as Customer[]),
-  addCustomer: (customer: Customer) => of(customer), // retourne un Customer
-  deleteCustomer: (id: number) => of(void 0)        // retourne void
+// Mock typé pour CustomerService avec Observable correct
+const customerServiceMock: Partial<CustomerService> = {
+  getCustomers: () => of([] as Customer[]),            // retourne un tableau vide
+  addCustomer: (customer: Customer) => of({ ...customer }), // retourne un Customer
+  deleteCustomer: (id: number) => of(void 0)          // retourne void
 };
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FormsModule], // nécessaire pour [(ngModel)] et ngForm
+      imports: [FormsModule],       // obligatoire pour [(ngModel)] et ngForm
       declarations: [AppComponent],
       providers: [
         { provide: CustomerService, useValue: customerServiceMock }
@@ -41,5 +41,13 @@ describe('AppComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.content span')?.textContent)
       .toContain('frontend app is running!');
+  });
+
+  // Nouveau test optionnel pour s'assurer que le service charge les customers
+  it('should load customers from the service', () => {
+    const fixture = TestBed.createComponent(AppComponent);
+    const app = fixture.componentInstance;
+    fixture.detectChanges();
+    expect(app.customers).toEqual([]); // le mock retourne un tableau vide
   });
 });
