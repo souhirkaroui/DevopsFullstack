@@ -33,7 +33,7 @@ pipeline {
         stage('Test Frontend') {
             steps {
                 dir('frontend-souhir') {
-                    sh 'npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox'
+                    sh 'npm run test -- --watch=false --browsers=ChromeHeadless'
                 }
             }
         }
