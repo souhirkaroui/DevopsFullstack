@@ -1,5 +1,6 @@
 // karma.conf.js
-process.env.CHROME_BIN = '/snap/bin/chromium';
+// Utilise Puppeteer pour Chromium headless sans Snap
+process.env.CHROME_BIN = require('puppeteer').executablePath();
 
 module.exports = function (config) {
   config.set({
@@ -12,12 +13,15 @@ module.exports = function (config) {
       require('karma-coverage'),
       require('@angular-devkit/build-angular/plugins/karma')
     ],
+
     client: { clearContext: false },
+
     coverageReporter: {
       dir: require('path').join(__dirname, './coverage/frontend'),
       subdir: '.',
       reporters: [{ type: 'html' }, { type: 'text-summary' }]
     },
+
     reporters: ['progress', 'kjhtml'],
     port: 9876,
     colors: true,
@@ -26,16 +30,16 @@ module.exports = function (config) {
     singleRun: true,
     restartOnFileChange: false,
 
-    // Important : utiliser Chromium headless Snap + flags corrects
-    browsers: ['ChromeHeadlessCustom'],
+    // Puppeteer headless Chromium
+    browsers: ['ChromeHeadlessNoSandbox'],
     customLaunchers: {
-      ChromeHeadlessCustom: {
+      ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',
         flags: [
           '--no-sandbox',
-          '--headless',
           '--disable-gpu',
           '--disable-dev-shm-usage',
+          '--headless',
           '--remote-debugging-port=9222'
         ]
       }
