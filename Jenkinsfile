@@ -9,23 +9,23 @@ pipeline {
              }
         }
         // Continuous Integration
-        stage('Build Backend') {
+        stage('Test Backend') {
             steps {
                 script {
                     dir('backend-souhir') {
                         
                        // sh 'mvn clean install -U'
-                        sh 'mvn clean package -DskipTests=true'
+                        sh 'mvn test package -DskipTests=true'
                     }
                 }       
             }
         }
         
-        stage('Test Backend') {
+        stage('Build Backend') {
             steps {
                 script {
                     dir('backend-souhir') {
-                        sh 'mvn test'
+                        sh 'mvn clean package -DskipTests=true'
                     }
                 }
             }
