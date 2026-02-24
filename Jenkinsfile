@@ -9,6 +9,15 @@ pipeline {
              }
         }
         // Continuous Integration
+        stage('Build Backend') {
+            steps {
+                script {
+                    dir('backend-souhir') {
+                        sh 'mvn clean package -DskipTests=true'
+                    }
+                }
+            }
+        }
         stage('Test Backend') {
             steps {
                 script {
@@ -20,16 +29,14 @@ pipeline {
                 }       
             }
         }
-        
-        stage('Build Backend') {
+         stage('Build Frontend') {
             steps {
-                script {
-                    dir('backend-souhir') {
-                        sh 'mvn clean package -DskipTests=true'
-                    }
+                dir('frontend-souhir') {
+                    sh 'ng build --configuration production'
                 }
             }
         }
+        
         stage('Test Frontend') {
             steps {
                 dir('frontend-souhir') {
@@ -38,13 +45,7 @@ pipeline {
             }
         }
 
-        stage('Build Frontend') {
-            steps {
-                dir('frontend-souhir') {
-                    sh 'ng build --configuration production'
-                }
-            }
-        }
+       
 
         stage('Docker Build & Push Frontend') {
             steps {
