@@ -1,4 +1,6 @@
 // karma.conf.js
+process.env.CHROME_BIN = '/usr/bin/chromium-browser'; // chemin vers ton Chromium headless
+
 module.exports = function (config) {
   config.set({
     basePath: '',
@@ -10,9 +12,11 @@ module.exports = function (config) {
       require('karma-coverage'),
       require('@angular-devkit/build-angular/plugins/karma')
     ],
+
     client: {
-      clearContext: false
+      clearContext: false // affiche le résultat dans le navigateur si tu veux
     },
+
     coverageReporter: {
       dir: require('path').join(__dirname, './coverage/frontend'),
       subdir: '.',
@@ -21,19 +25,26 @@ module.exports = function (config) {
         { type: 'text-summary' }
       ]
     },
+
     reporters: ['progress', 'kjhtml'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: false,   // pas besoin de watch sur Jenkins
+    autoWatch: false, // désactivé pour Jenkins
+    singleRun: true,  // exécuté une seule fois dans Jenkins
+    restartOnFileChange: false,
+
     browsers: ['ChromeHeadlessNoSandbox'],
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',
-        flags: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage']
+        flags: [
+          '--no-sandbox',
+          '--disable-gpu',
+          '--disable-dev-shm-usage',
+          '--remote-debugging-port=9222'
+        ]
       }
-    },
-    singleRun: true,
-    restartOnFileChange: false
+    }
   });
 };
