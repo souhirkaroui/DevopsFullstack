@@ -1,3 +1,4 @@
+// karma.conf.js
 module.exports = function (config) {
   config.set({
     basePath: '',
@@ -9,27 +10,27 @@ module.exports = function (config) {
       require('karma-coverage'),
       require('@angular-devkit/build-angular/plugins/karma')
     ],
-    client: { clearContext: false },
+    client: {
+      clearContext: false
+    },
     coverageReporter: {
       dir: require('path').join(__dirname, './coverage/frontend'),
       subdir: '.',
-      reporters: [{ type: 'html' }, { type: 'text-summary' }]
+      reporters: [
+        { type: 'html' },
+        { type: 'text-summary' }
+      ]
     },
     reporters: ['progress', 'kjhtml'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: false,
+    autoWatch: false,   // pas besoin de watch sur Jenkins
     browsers: ['ChromeHeadlessNoSandbox'],
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',
-        flags: [
-          '--no-sandbox',
-          '--disable-gpu',
-          '--disable-dev-shm-usage',
-          '--remote-debugging-port=9222'
-        ]
+        flags: ['--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage']
       }
     },
     singleRun: true,
