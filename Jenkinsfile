@@ -33,7 +33,7 @@ pipeline {
         stage('Test Frontend') {
             steps {
                 dir('frontend-souhir') {
-                    sh 'ng test --watch=false'
+                    sh 'npm run test -- --watch=false'
                 }
             }
         }
