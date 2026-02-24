@@ -1,24 +1,25 @@
+// src/app/app.component.spec.ts
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import { FormsModule } from '@angular/forms'; // <-- ajouter
-import { CustomerService } from './customer.service';
+import { CustomerService, Customer } from './customer.service';
 import { of } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+
+// Mock correctement typé pour CustomerService
+const customerServiceMock = {
+  getCustomers: () => of([] as Customer[]),
+  addCustomer: (customer: Customer) => of(customer), // retourne un Customer
+  deleteCustomer: (id: number) => of(void 0)        // retourne void
+};
 
 describe('AppComponent', () => {
-  let mockCustomerService: Partial<CustomerService>;
-
   beforeEach(async () => {
-    // Mock du service pour éviter les requêtes HTTP réelles
-    mockCustomerService = {
-      getCustomers: () => of([]),
-      addCustomer: () => of(null),
-      deleteCustomer: () => of(null)
-    };
-
     await TestBed.configureTestingModule({
-      imports: [FormsModule], // <-- important
+      imports: [FormsModule], // nécessaire pour [(ngModel)] et ngForm
       declarations: [AppComponent],
-      providers: [{ provide: CustomerService, useValue: mockCustomerService }]
+      providers: [
+        { provide: CustomerService, useValue: customerServiceMock }
+      ]
     }).compileComponents();
   });
 
