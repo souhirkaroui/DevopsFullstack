@@ -1,20 +1,24 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
-import { CustomerService } from './customer.service'; // <-- ajoute ton service si utilisé
-import { HttpClientModule } from '@angular/common/http'; // <-- indispensable pour HttpClient
+import { FormsModule } from '@angular/forms'; // <-- ajouter
+import { CustomerService } from './customer.service';
+import { of } from 'rxjs';
 
 describe('AppComponent', () => {
+  let mockCustomerService: Partial<CustomerService>;
+
   beforeEach(async () => {
+    // Mock du service pour éviter les requêtes HTTP réelles
+    mockCustomerService = {
+      getCustomers: () => of([]),
+      addCustomer: () => of(null),
+      deleteCustomer: () => of(null)
+    };
+
     await TestBed.configureTestingModule({
-      imports: [
-        HttpClientModule // <-- permet l'injection de HttpClient
-      ],
-      declarations: [
-        AppComponent
-      ],
-      providers: [
-        CustomerService // <-- ajoute tous les services utilisés par ton composant
-      ]
+      imports: [FormsModule], // <-- important
+      declarations: [AppComponent],
+      providers: [{ provide: CustomerService, useValue: mockCustomerService }]
     }).compileComponents();
   });
 
@@ -34,6 +38,7 @@ describe('AppComponent', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('frontend app is running!');
+    expect(compiled.querySelector('.content span')?.textContent)
+      .toContain('frontend app is running!');
   });
 });
