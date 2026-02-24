@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-
+import { MaterialModule } from './material.module';
 import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CustomerComponent } from './customer/customer.component';
@@ -24,6 +24,8 @@ import { MatCardModule } from '@angular/material/card';
     BrowserAnimationsModule,
     FormsModule,
     HttpClientModule,
+    MaterialModule,
+     
 
     // Material
     MatInputModule,
