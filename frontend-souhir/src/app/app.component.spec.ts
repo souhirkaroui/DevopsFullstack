@@ -1,4 +1,6 @@
 // src/app/app.component.spec.ts
+import { MaterialModule } from './material.module';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
 import { CustomerService, Customer } from './customer.service';
@@ -15,14 +17,17 @@ const customerServiceMock: Partial<CustomerService> = {
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FormsModule],       // obligatoire pour [(ngModel)] et ngForm
+      imports: [
+        FormsModule,
+        BrowserAnimationsModule,
+        MaterialModule   // 👈 AJOUT ICI
+      ],
       declarations: [AppComponent],
       providers: [
         { provide: CustomerService, useValue: customerServiceMock }
       ]
     }).compileComponents();
   });
-
   it('should create the app', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
