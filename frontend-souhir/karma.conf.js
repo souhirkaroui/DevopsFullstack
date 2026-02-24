@@ -1,7 +1,9 @@
+// karma.conf.js
 process.env.CHROME_BIN = '/snap/bin/chromium';
 
 module.exports = function (config) {
   config.set({
+    basePath: '',
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
     plugins: [
       require('karma-jasmine'),
@@ -24,13 +26,14 @@ module.exports = function (config) {
     singleRun: true,
     restartOnFileChange: false,
 
-    browsers: ['ChromeHeadlessNoSandbox'],
+    // Important : utiliser Chromium headless Snap + flags corrects
+    browsers: ['ChromeHeadlessCustom'],
     customLaunchers: {
-      ChromeHeadlessNoSandbox: {
+      ChromeHeadlessCustom: {
         base: 'ChromeHeadless',
         flags: [
-          '--headless',
           '--no-sandbox',
+          '--headless',
           '--disable-gpu',
           '--disable-dev-shm-usage',
           '--remote-debugging-port=9222'
