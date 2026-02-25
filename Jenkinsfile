@@ -32,6 +32,7 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend-souhir') {
+                    sh 'npm install'
                     sh 'ng build --configuration production'
                 }
             }
