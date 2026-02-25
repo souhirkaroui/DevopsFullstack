@@ -9,6 +9,6 @@ RUN npm run build --prod
 # Étape 2 : Nginx
 FROM nginx:alpine
 COPY --from=build /app/dist/frontend /usr/share/nginx/html
-COPY default.conf /etc/nginx/conf.d/default.conf  # <-- fichier à la racine
+COPY frontend-souhir/default.conf /etc/nginx/conf.d/default.conf  # <--- corrigé
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
