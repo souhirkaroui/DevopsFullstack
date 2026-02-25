@@ -78,32 +78,40 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
-         steps {
-           withKubeConfig([credentialsId: 'kubeconfig']) { 
+    steps {
+        withKubeConfig([credentialsId: 'kubeconfig']) {
             script {
-                // On se place dans le dossier backend pour appliquer tous les YAML existants
-                dir('backend-souhir') {
-                    sh 'kubectl apply -f namespace.yaml'
-                    sh 'kubectl apply -f backenddeploy.yaml'
-                    sh 'kubectl apply -f mysql-deployment.yaml'
+
+                //  Namespace (TOUJOURS EN PREMIER)
+                sh 'kubectl apply -f namespace.yaml'
+
+                //  Database (secret + storage + deployment)
+                dir('database') {
                     sh 'kubectl apply -f mysql-secret.yaml'
                     sh 'kubectl apply -f mysql-storage.yaml'
+                    sh 'kubectl apply -f mysql-deployment.yaml'
                 }
 
-                // Frontend YAML si nécessaire
+                // Backend
+                dir('backend-souhir') {
+                    sh 'kubectl apply -f backenddeploy.yaml'
+                }
+
+                //  Frontend
                 dir('frontend-souhir') {
                     sh 'kubectl apply -f frontdeploy.yaml'
                 }
 
-                // Ingress YAML à la racine (ou adapte le chemin si différent)
+                //  Ingress
                 sh 'kubectl apply -f ingress.yaml'
 
-                // Vérification des déploiements
+                //  Vérification
+                sh 'kubectl rollout status deployment mysql-deployment -n default'
                 sh 'kubectl rollout status deployment backend-deployment -n default'
                 sh 'kubectl rollout status deployment frontend-deployment -n default'
             }
         }
-      }
-   }
+    }
+  }
  }
 }
