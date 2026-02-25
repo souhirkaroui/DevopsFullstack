@@ -111,11 +111,4 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            // Nettoyage Docker et workspace après chaque build s’exécute même si le pipeline échoue
-            sh 'docker system prune -f'  //supprime les containers/images non utilisés pour libérer de l’espace
-            cleanWs() //nettoie l’espace de travail Jenkins (workspace) pour éviter d’accumuler les fichiers entre builds
-        }
-    }
 }
