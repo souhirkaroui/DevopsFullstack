@@ -4,7 +4,7 @@ metadata:
   name: backend
   namespace: my-app
 spec:
-  replicas: 2  # Nombre de pods backend
+  replicas: 2
   selector:
     matchLabels:
       app: backend
@@ -15,12 +15,21 @@ spec:
     spec:
       containers:
         - name: backend
-          image: souhirks/backend:latest  # Remplace par ton image Docker
+          image: souhirks/backend:latest
           ports:
             - containerPort: 8080
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://mysql:3306/mydb  # Nom du service mysql + base
+            - name: SPRING_DATASOURCE_USERNAME
+              value: root
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secret
+                  key: password
 ---
 apiVersion: v1
 kind: Service
