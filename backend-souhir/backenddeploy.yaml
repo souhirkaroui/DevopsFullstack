@@ -22,7 +22,7 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://mysql:3306/mydb  # Nom du service mysql + base
+              value: jdbc:mysql://mysql.my-app.svc.cluster.local:3306/mydb  # Nom du service mysql + base
             - name: SPRING_DATASOURCE_USERNAME
               value: root
             - name: SPRING_DATASOURCE_PASSWORD
