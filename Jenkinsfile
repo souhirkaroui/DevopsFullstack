@@ -90,6 +90,7 @@ pipeline {
                     sh 'kubectl apply -f mysql-secret.yaml'
                     sh 'kubectl apply -f mysql-storage.yaml'
                     sh 'kubectl apply -f mysql-deployment.yaml'
+                    sh 'kubectl apply -f mysql-svc.yaml'
                 }
 
                 // Backend
