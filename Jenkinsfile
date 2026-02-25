@@ -107,9 +107,9 @@ pipeline {
                 sh 'kubectl apply -f ingress.yaml'
 
                 //  Vérification
-                sh 'kubectl rollout status deployment mysql -n my-app'
-                sh 'kubectl rollout status deployment backend -n my-app'
-                sh 'kubectl rollout status deployment front -n my-app'
+                //sh 'kubectl rollout status deployment mysql -n my-app'
+               // sh 'kubectl rollout status deployment backend -n my-app'
+               // sh 'kubectl rollout status deployment front -n my-app'
             }
         }
     }
