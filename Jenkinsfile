@@ -8,7 +8,7 @@ pipeline {
                sh 'ls -lah'  // Vérifier si le code est bien cloné
              }
         }
-        // Continuous Integration
+
         stage('Build Backend') {
             steps {
                 script {
@@ -18,18 +18,18 @@ pipeline {
                 }
             }
         }
+
         stage('Test Backend') {
             steps {
                 script {
                     dir('backend-souhir') {
-                        
-                       // sh 'mvn clean install -U'
                         sh 'mvn test package -DskipTests=true'
                     }
                 }       
             }
         }
-         stage('Build Frontend') {
+
+        stage('Build Frontend') {
             steps {
                 dir('frontend-souhir') {
                     sh 'ng build --configuration production'
@@ -44,8 +44,6 @@ pipeline {
                 }
             }
         }
-
-       
 
         stage('Docker Build & Push Frontend') {
             steps {
@@ -78,41 +76,45 @@ pipeline {
         }
 
         stage('Deploy to Kubernetes') {
-    steps {
-        withKubeConfig([credentialsId: 'kubeconfig']) {
-            script {
+            steps {
+                withKubeConfig([credentialsId: 'kubeconfig']) {
+                    script {
 
-                //  Namespace (TOUJOURS EN PREMIER)
-                sh 'kubectl apply -f namespace.yaml'
+                        //  Namespace
+                        sh 'kubectl apply -f namespace.yaml'
 
-                //  Database (secret + storage + deployment)
-                dir('database') {
-                    sh 'kubectl apply -f mysql-secret.yaml'
-                    sh 'kubectl apply -f mysql-storage.yaml'
-                    sh 'kubectl apply -f mysql-deployment.yaml'
-                    sh 'kubectl apply -f mysql-svc.yaml'
+                        //  Database
+                        dir('database') {
+                            sh 'kubectl apply -f mysql-secret.yaml'
+                            sh 'kubectl apply -f mysql-storage.yaml'
+                            sh 'kubectl apply -f mysql-deployment.yaml'
+                            sh 'kubectl apply -f mysql-svc.yaml'
+                        }
+
+                        // Backend
+                        dir('backend-souhir') {
+                            sh 'kubectl apply -f backenddeploy.yaml'
+                        }
+
+                        // Frontend
+                        dir('frontend-souhir') {
+                            sh 'kubectl apply -f frontdeploy.yaml'
+                        }
+
+                        // Ingress
+                        sh 'kubectl apply -f ingress.yaml'
+
+                    }
                 }
-
-                // Backend
-                dir('backend-souhir') {
-                    sh 'kubectl apply -f backenddeploy.yaml'
-                }
-
-                //  Frontend
-                dir('frontend-souhir') {
-                    sh 'kubectl apply -f frontdeploy.yaml'
-                }
-
-                //  Ingress
-                sh 'kubectl apply -f ingress.yaml'
-
-                //  Vérification
-                //sh 'kubectl rollout status deployment mysql -n my-app'
-               // sh 'kubectl rollout status deployment backend -n my-app'
-               // sh 'kubectl rollout status deployment front -n my-app'
             }
         }
     }
-  }
- }
+
+    post {
+        always {
+            // Nettoyage Docker et workspace après chaque build s’exécute même si le pipeline échoue
+            sh 'docker system prune -f'  //supprime les containers/images non utilisés pour libérer de l’espace
+            cleanWs() //nettoie l’espace de travail Jenkins (workspace) pour éviter d’accumuler les fichiers entre builds
+        }
+    }
 }
