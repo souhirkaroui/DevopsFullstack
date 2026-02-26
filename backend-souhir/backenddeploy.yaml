@@ -17,7 +17,7 @@ spec:
       initContainers:
         - name: wait-for-mysql
           image: busybox:1.34
-          command: ['sh', '-c', 'until nc -z mysql 3306; do echo waiting for mysql; sleep 3; done;']
+          command: ['sh', '-c', 'until nc -z mysql.my-app.svc.cluster.local 3306; do echo waiting for mysql; sleep 3; done;']
       containers:
         - name: backend
           image: souhirks/backend:latest
