@@ -40,11 +40,11 @@ metadata:
   name: front
   namespace: my-app
 spec:
+  type: NodePort
   selector:
     app: front
   ports:
     - protocol: TCP
       port: 4200
       targetPort: 4200
-  type: NodePort
-  nodePort: 30080
+      nodePort: 30080
