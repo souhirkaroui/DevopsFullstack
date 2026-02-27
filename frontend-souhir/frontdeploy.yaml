@@ -13,11 +13,6 @@ spec:
       labels:
         app: front
     spec:
-      # Init container pour attendre Backend
-      initContainers:
-        - name: wait-for-backend
-          image: busybox:1.34
-          command: ['sh', '-c', 'until nc -z backend 8080; do echo waiting for backend; sleep 3; done;']
       containers:
         - name: front
           image: souhirks/frontend:latest
