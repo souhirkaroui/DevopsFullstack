@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: backend-deployment
   namespace: my-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -15,14 +15,12 @@ spec:
     spec:
       containers:
         - name: backend
-          image: souhirks/backend:latest
+          image: ton-backend-image:latest
           ports:
             - containerPort: 8080
           env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: prod
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://mysql:3306/mydb?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+              value: jdbc:mysql://mysql:3306/mydb
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -33,18 +31,8 @@ spec:
                 secretKeyRef:
                   name: mysql-secret
                   key: password
-          readinessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8080
-            initialDelaySeconds: 60
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /actuator/health
-              port: 8080
-            initialDelaySeconds: 120
-            periodSeconds: 10
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
 ---
 apiVersion: v1
 kind: Service
