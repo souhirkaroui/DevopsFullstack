@@ -22,7 +22,7 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://mysql.my-app.svc.cluster.local:3306/mydb
+              value: jdbc:mysql://10.105.108.229:3306/mydb
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
