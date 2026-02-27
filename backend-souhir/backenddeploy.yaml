@@ -22,7 +22,7 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: prod
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://mysql:3306/mydb
+              value: jdbc:mysql://mysql:3306/mydb?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
