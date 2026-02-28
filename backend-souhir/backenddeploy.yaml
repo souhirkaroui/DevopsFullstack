@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: ton-backend-image:latest
+          image: souhirks/backend:v1
           ports:
             - containerPort: 8080
           env:
