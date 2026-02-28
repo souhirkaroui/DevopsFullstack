@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: souhirks/backend:v1
+          image: souhirks/backend:latest
           ports:
             - containerPort: 8080
           env:
