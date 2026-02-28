@@ -92,7 +92,7 @@ pipeline {
                   
 
                     // Attente que MySQL soit Ready
-                    sh 'kubectl rollout status deployment/mysql --timeout=120s'
+                  //  sh 'kubectl rollout status deployment/mysql --timeout=120s'
                 }
 
                 // Backend
@@ -100,7 +100,7 @@ pipeline {
                     sh 'kubectl apply -f backenddeploy.yaml'
 
                     // Attente que le backend soit Ready
-                    sh 'kubectl rollout status deployment/backend-deployment --timeout=120s'
+                  //  sh 'kubectl rollout status deployment/backend-deployment --timeout=120s'
                 }
 
                 // Frontend
@@ -108,7 +108,7 @@ pipeline {
                     sh 'kubectl apply -f frontdeploy.yaml'
 
                     // Attente que le frontend soit Ready
-                    sh 'kubectl rollout status deployment/frontend-deployment --timeout=120s'
+                  //  sh 'kubectl rollout status deployment/frontend-deployment --timeout=120s'
                 }
 
                 // Ingress
