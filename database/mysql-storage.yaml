@@ -5,7 +5,7 @@ metadata:
   namespace: my-app
 spec:
   capacity:
-    storage: 2Gi
+    storage: 1Gi
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
@@ -23,5 +23,5 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 2Gi
+      storage: 1Gi
   storageClassName: manual
