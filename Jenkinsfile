@@ -76,39 +76,48 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                withKubeConfig([credentialsId: 'kubeconfig']) {
-                    script {
+       stage('Deploy to Kubernetes') {
+    steps {
+        withKubeConfig([credentialsId: 'kubeconfig']) {
+            script {
 
-                        //  Namespace
-                        sh 'kubectl apply -f namespace.yaml'
+                //  Namespace
+                sh 'kubectl apply -f namespace.yaml'
 
-                        //  Database
-                        dir('database') {
-                            sh 'kubectl apply -f mysql-secret.yaml'
-                            sh 'kubectl apply -f mysql-storage.yaml'
-                            sh 'kubectl apply -f mysql-deployment.yaml'
-                            sh 'kubectl apply -f mysql-svc.yaml'
-                        }
+                //  Database
+                dir('database') {
+                    sh 'kubectl apply -f mysql-secret.yaml'
+                    sh 'kubectl apply -f mysql-storage.yaml'
+                    sh 'kubectl apply -f mysql-deployment.yaml'
+                    sh 'kubectl apply -f mysql-svc.yaml'
 
-                        // Backend
-                        dir('backend-souhir') {
-                            sh 'kubectl apply -f backenddeploy.yaml'
-                        }
-
-                        // Frontend
-                        dir('frontend-souhir') {
-                            sh 'kubectl apply -f frontdeploy.yaml'
-                        }
-
-                        // Ingress
-                        sh 'kubectl apply -f ingress.yaml'
-
-                    }
+                    // Attente que MySQL soit Ready
+                    sh 'kubectl rollout status deployment/mysql --timeout=120s'
                 }
+
+                // Backend
+                dir('backend-souhir') {
+                    sh 'kubectl apply -f backenddeploy.yaml'
+
+                    // Attente que le backend soit Ready
+                    sh 'kubectl rollout status deployment/backend-deployment --timeout=120s'
+                }
+
+                // Frontend
+                dir('frontend-souhir') {
+                    sh 'kubectl apply -f frontdeploy.yaml'
+
+                    // Attente que le frontend soit Ready
+                    sh 'kubectl rollout status deployment/frontend-deployment --timeout=120s'
+                }
+
+                // Ingress
+              sh 'kubectl apply -f ingress.yaml'
+               
             }
         }
+    }
+}
     }
 
 }
