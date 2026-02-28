@@ -32,12 +32,12 @@ spec:
       volumes:
         - name: mysql-storage
           persistentVolumeClaim:
-            claimName: mysqlpvclaim
+            claimName: mysql-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: mysql
+  name: mysql-svc
   namespace: my-app
 spec:
   selector:
