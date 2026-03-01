@@ -22,22 +22,21 @@ spec:
           env:
             - name: SPRING_DATASOURCE_URL
               value: "jdbc:mysql://mysqlsvc.my-app.svc.cluster.local:3306/mydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
-
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
                   key: username
-
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
                   key: password
-
             - name: SPRING_PROFILES_ACTIVE
               value: prod
+
 ---
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -50,4 +49,4 @@ spec:
     - port: 8080        # Port interne Kubernetes
       targetPort: 8080  # Port du container
       nodePort: 30081   # Port externe sur tous les nodes
-  type: NodePort        # <-- Changement ici
+  type: NodePort        
