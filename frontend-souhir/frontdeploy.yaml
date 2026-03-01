@@ -21,18 +21,6 @@ spec:
           env:
             - name: BACKEND_URL
               value: http://backend.my-app.svc.cluster.local:8080
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 80
-            initialDelaySeconds: 30
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 4200
-            initialDelaySeconds: 60
-            periodSeconds: 10
 
 ---
 apiVersion: v1
