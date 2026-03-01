@@ -16,23 +16,28 @@ spec:
       containers:
         - name: backend
           image: souhirks/backend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql-svc:3306/Register?serverTimezone=UTC"
+              value: jdbc:mysql://mysql-svc.my-app.svc.cluster.local:3306/mydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
                   key: username
+
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: mysql-secret
                   key: password
+
             - name: SPRING_PROFILES_ACTIVE
               value: prod
+
 ---
 apiVersion: v1
 kind: Service
