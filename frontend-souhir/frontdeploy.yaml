@@ -4,7 +4,7 @@ metadata:
   name: front
   namespace: my-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: front
@@ -17,14 +17,14 @@ spec:
         - name: front
           image: souhirks/frontend:latest
           ports:
-            - containerPort: 4200
+            - containerPort: 80
           env:
             - name: BACKEND_URL
               value: http://backend.my-app.svc.cluster.local:8080
           readinessProbe:
             httpGet:
               path: /
-              port: 4200
+              port: 80
             initialDelaySeconds: 30
             periodSeconds: 10
           livenessProbe:
