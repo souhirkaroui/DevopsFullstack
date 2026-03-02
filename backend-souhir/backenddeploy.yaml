@@ -40,13 +40,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend
+  name: backendsvc
   namespace: my-app
 spec:
   selector:
     app: backend
   ports:
-    - port: 8080        # Port interne Kubernetes
+    - port: 8080  # Port interne Kubernetes
+      protocol: TCP
       targetPort: 8080  # Port du container
-      nodePort: 30081   # Port externe sur tous les nodes
-  type: NodePort        
+  type: ClusterIP        
