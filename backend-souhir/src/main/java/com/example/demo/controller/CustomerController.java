@@ -7,7 +7,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin
+// 🚀 CORS configuré pour le frontend via Ingress
+@CrossOrigin(
+        origins = "http://myapp.local",             // URL de ton frontend via Ingress
+        allowedHeaders = "*",                        // Autorise tous les headers
+        allowedMethods = {"GET", "POST", "PUT", "DELETE", "OPTIONS"} // Toutes les méthodes
+)
 @RestController
 @RequestMapping("/customers")
 public class CustomerController {
@@ -15,27 +20,32 @@ public class CustomerController {
     @Autowired
     private CustomerService service;
 
+    // Récupérer tous les clients
     @GetMapping
     public List<Customer> getAllCustomers() {
         return service.getAllCustomers();
     }
 
+    // Récupérer un client par ID
     @GetMapping("/{id}")
     public Customer getCustomerById(@PathVariable Long id) {
         return service.getCustomerById(id);
     }
 
+    // Créer un nouveau client
     @PostMapping
     public Customer createCustomer(@RequestBody Customer customer) {
         return service.saveCustomer(customer);
     }
 
+    // Mettre à jour un client existant
     @PutMapping("/{id}")
     public Customer updateCustomer(@PathVariable Long id, @RequestBody Customer customer) {
         customer.setId(id);
         return service.saveCustomer(customer);
     }
 
+    // Supprimer un client
     @DeleteMapping("/{id}")
     public void deleteCustomer(@PathVariable Long id) {
         service.deleteCustomer(id);
