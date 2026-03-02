@@ -5,24 +5,23 @@ metadata:
   namespace: my-app
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/use-regex: "true"  # Permet les regex si nécessaire
 spec:
   ingressClassName: nginx
   rules:
     - host: myapp.local
       http:
         paths:
-          - path: /        # Frontend sur /
+          - path: /
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: frontsvc      # <-- corrigé
                 port:
                   number: 80
-          - path: /api            # Backend sur /api et sous-chemins
-            pathType: ImplementationSpecific
+          - path: /api
+            pathType: Prefix
             backend:
               service:
-                name: backend
+                name: backendsvc   # <-- corrigé
                 port:
                   number: 8080
