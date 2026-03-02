@@ -4,7 +4,7 @@ metadata:
   name: my-app-ingress
   namespace: my-app
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
@@ -14,7 +14,7 @@ spec:
         paths:
           # Frontend Angular
           - path: /(.*)
-            pathType: ImplementationSpecific
+            pathType: Prefix
             backend:
               service:
                 name: frontsvc
@@ -22,9 +22,11 @@ spec:
                   number: 80
           # Backend Spring Boot
           - path: /api(/|$)(.*)
-            pathType: ImplementationSpecific
+            pathType: Prefix
             backend:
               service:
                 name: backendsvc
+                port:
+                  number: 8080
                 port:
                   number: 8080
