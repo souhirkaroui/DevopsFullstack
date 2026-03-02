@@ -7,12 +7,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// 🚀 CORS configuré pour le frontend via Ingress
-@CrossOrigin(
-        origins = "http://myapp.local",             // URL de ton frontend via Ingress
-        allowedHeaders = "*",                        // Autorise tous les headers
-        allowedMethods = {"GET", "POST", "PUT", "DELETE", "OPTIONS"} // Toutes les méthodes
-)
+// CORS configuré pour le frontend via Ingress
+@CrossOrigin(origins = "http://myapp.local")  // autorise toutes les méthodes par défaut
 @RestController
 @RequestMapping("/customers")
 public class CustomerController {
