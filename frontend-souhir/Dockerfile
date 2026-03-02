@@ -1,20 +1,22 @@
-# Étape 1 : Build Angular
-FROM node:18 AS build
-WORKDIR /app
+# Étape 1 : Build Angular 
+FROM node:18 AS build WORKDIR /app 
 
-COPY package*.json ./
-RUN npm install
+# Installer les dépendances 
+COPY package*.json ./ RUN npm install 
 
-COPY . .
-RUN npm run build --configuration production
+# Copier le reste du code 
+COPY . . 
 
-# Étape 2 : Nginx
-FROM nginx:alpine
+# Build Angular en prod 
+RUN npm run build --prod 
 
-# Copier TOUT le dossier dist (plus sûr)
-COPY --from=build /app/dist/ /usr/share/nginx/html
+# Étape 2 : Nginx FROM nginx:alpine
 
-COPY default.conf /etc/nginx/conf.d/default.conf
+# Copier les fichiers buildés 
+COPY --from=build /app/dist/frontend /usr/share/nginx/html 
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Copier le fichier de configuration Nginx 
+COPY default.conf /etc/nginx/conf.d/default.conf 
+
+# Exposer le port 
+EXPOSE 80 # Lancer Nginx CMD ["nginx", "-g", "daemon off;"]
