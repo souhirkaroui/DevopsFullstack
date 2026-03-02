@@ -2,27 +2,19 @@
 FROM node:18 AS build
 WORKDIR /app
 
-# Installer les dépendances
 COPY package*.json ./
 RUN npm install
 
-# Copier le reste du code
 COPY . .
-
-# Build Angular en prod
-RUN npm run build --prod
+RUN npm run build --configuration production
 
 # Étape 2 : Nginx
 FROM nginx:alpine
 
-# Copier les fichiers buildés
-COPY --from=build /app/dist/frontend /usr/share/nginx/html
+# Copier TOUT le dossier dist (plus sûr)
+COPY --from=build /app/dist/ /usr/share/nginx/html
 
-# Copier le fichier de configuration Nginx
 COPY default.conf /etc/nginx/conf.d/default.conf
 
-# Exposer le port
 EXPOSE 80
-
-# Lancer Nginx
 CMD ["nginx", "-g", "daemon off;"]
