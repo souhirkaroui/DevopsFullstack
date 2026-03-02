@@ -4,22 +4,23 @@ metadata:
   name: my-app-ingress
   namespace: my-app
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/use-regex: "true"  # Permet les regex si nécessaire
 spec:
-  ingressClassName: nginx   # <-- Important : indique que c'est pris en charge par NGINX
+  ingressClassName: nginx
   rules:
-    - host: myapp.local      # Domaine local à configurer dans /etc/hosts
+    - host: myapp.local
       http:
         paths:
-          - path: /(.*)
+          - path: /        # Frontend sur /
             pathType: Prefix
             backend:
               service:
                 name: frontend
                 port:
                   number: 80
-          - path: /api(/|$)(.*)
-            pathType: Prefix
+          - path: /api            # Backend sur /api et sous-chemins
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: backend
