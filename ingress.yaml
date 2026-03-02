@@ -12,14 +12,16 @@ spec:
     - host: myapp.local
       http:
         paths:
-          - path: /(.*)           # frontend
+          # Frontend Angular
+          - path: /(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: frontsvc
                 port:
                   number: 80
-          - path: /api(/|$)(.*)   # backend
+          # Backend Spring Boot
+          - path: /api(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
               service:
