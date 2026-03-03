@@ -134,8 +134,9 @@ pipeline {
                 }
             }
         }
-/* ================= Continuous Integration ================= */
-   stage('Build & Push') {
+/* ================= Continuous Integration frontend ============================ */
+   
+   stage('Docker Build & Push Frontend') {
     steps {
         script {
             try {
@@ -147,23 +148,52 @@ pipeline {
                 )]) {
 
                     sh '''
-                        ansible-playbook playbook1.yaml \
-                        -e dockerhub_user=$DOCKER_USER \
-                        -e dockerhub_password=$DOCKER_PASS
+                    ansible-playbook playbookfront.yml \
+                      --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
                     '''
                 }
 
-                notifyMail('Build & Push', 'SUCCESS')
+                notifyMail('Build and push Frontend', 'SUCCESS')
 
             } catch (err) {
 
-                notifyMail('Build & Push', 'FAILED')
-                error("Build & Push failed")
-
+                notifyMail('Build and push', 'FAILED')
+                error("Frontend Docker build failed")
             }
         }
     }
 }
+/* ================= Continuous Integration backend ========================== */
+     stage('Docker Build & Push Backend') {
+    steps {
+        script {
+            try {
+
+                withCredentials([usernamePassword(
+                    credentialsId: 'DockerHub',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+
+                    sh '''
+                    ansible-playbook playbookback.yml \
+                      --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
+                    '''
+                }
+
+                notifyMail('Docker Build & Push Backend', 'SUCCESS')
+
+            } catch (err) {
+
+                notifyMail('Docker Build & Push Backend', 'FAILED')
+                error("Backend Docker build failed")
+            }
+        }
+    }
+}                 
+
+    
+                  
     
      /* =================CONTINUOUS DEPLOY ================= */
        stage('Deploy to Kubernetes') {
