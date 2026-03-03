@@ -1,0 +1,37 @@
+---
+- name: Build and Push Frontend Image
+  hosts: localhost
+  become: false
+
+  vars:
+    image_name: "{{ dockerhub_user }}/frontend"
+    image_tag: "{{ lookup('env','BUILD_NUMBER') | default('latest') }}"
+    project_path: "./frontend-souhir"
+
+  tasks:
+
+    - name: Login to DockerHub
+      community.docker.docker_login:
+        username: "{{ dockerhub_user }}"
+        password: "{{ dockerhub_password }}"
+
+    - name: Build and push frontend image
+      community.docker.docker_image:
+        name: "{{ image_name }}"
+        tag: "{{ image_tag }}"
+        source: build
+        force_source: true
+        build:
+          path: "{{ project_path }}"
+        push: true
+
+    - name: Tag frontend latest
+      community.docker.docker_image:
+        name: "{{ image_name }}"
+        tag: latest
+        source: local
+        push: true
+
+    - name: Logout Docker
+      community.docker.docker_login:
+        state: absent
