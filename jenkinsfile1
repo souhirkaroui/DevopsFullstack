@@ -13,99 +13,105 @@ pipeline {
 
     stages {
 
-  /* =========================== BUILD ============================= */
+        /* =========================== BUILD BACKEND ============================= */
         stage('Build Backend') {
             steps {
                 script {
                     try {
                         dir('backend-souhir') {
-                        sh 'mvn clean package -DskipTests=true'
-                        notifyMail('Build', 'SUCCESS')
+                            sh 'mvn clean package -DskipTests=true'
+                        }
+                        notifyMail('Build Backend', 'SUCCESS')
                     } catch (err) {
-                        notifyMail('Build', 'FAILED')
-                        error("Build failed")
+                        notifyMail('Build Backend', 'FAILED')
+                        error("Build Backend failed")
                     }
                 }
             }
         }
-}
-/* ============================= TEST =================================== */
+
+        /* ============================= TEST BACKEND ========================== */
         stage('Test Backend') {
             steps {
                 script {
                     try {
                         dir('backend-souhir') {
-                        sh 'mvn test package -DskipTests=true'
-                        notifyMail('Test', 'SUCCESS')
+                            sh 'mvn test package -DskipTests=true'
+                        }
+                        notifyMail('Test Backend', 'SUCCESS')
                     } catch (err) {
-                        notifyMail('Test', 'FAILED')
-                        error("Tests failed")
+                        notifyMail('Test Backend', 'FAILED')
+                        error("Test Backend failed")
                     }
                 }
             }
         }
- } 
-/* =========================== BUILD FRONTEND ============================= */    
-     stage('Build Frontend') {
-            steps {
-            try {
-                dir('frontend-souhir') {
-                    sh 'npm install'
-                    sh 'ng build --configuration production'
-                    notifyMail('Build', 'SUCCESS')
-                    } catch (err) {
-                        notifyMail('Build', 'FAILED')
-                        error("Build failed")
-                      }
-                   }
-                }
-            }
- /* =========================== TEST FRONTEND ============================= */         
-        stage('TEST Frontend') {
-            steps {
-            try {
-                dir('frontend-souhir') {
-                    sh 'npm run test -- --watch=false --browsers=ChromeHeadless'
-                    notifyMail('Test', 'SUCCESS')
-                    } catch (err) {
-                        notifyMail('Test', 'FAILED')
-                        error("Tests failed")
-                      }
-                   }
-                }
-            }
 
- /* ======================= SONARQUBE + QUALITY GATE ================= */
-        stage('SonarQube & Quality Gate') {
+        /* =========================== BUILD FRONTEND ============================ */
+        stage('Build Frontend') {
+            steps {
+                script {
+                    try {
+                        dir('frontend-souhir') {
+                            sh 'npm install'
+                            sh 'ng build --configuration production'
+                        }
+                        notifyMail('Build Frontend', 'SUCCESS')
+                    } catch (err) {
+                        notifyMail('Build Frontend', 'FAILED')
+                        error("Build Frontend failed")
+                    }
+                }
+            }
+        }
+
+        /* =========================== TEST FRONTEND ============================= */
+        stage('Test Frontend') {
+            steps {
+                script {
+                    try {
+                        dir('frontend-souhir') {
+                            sh 'npm run test -- --watch=false --browsers=ChromeHeadless'
+                        }
+                        notifyMail('Test Frontend', 'SUCCESS')
+                    } catch (err) {
+                        notifyMail('Test Frontend', 'FAILED')
+                        error("Test Frontend failed")
+                    }
+                }
+            }
+        }
+
+        /* ======================= SONARQUBE BACKEND ============================ */
+        stage('SonarQube & Quality Gate Backend') {
             steps {
                 script {
                     try {
                         withSonarQubeEnv('SonarQube') {
-                            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                                            sh '''
-                                                     mvn clean package -DskipTests sonar:sonar \
-                                                     -Dsonar.projectKey=kubernetes \
-                                                     -Dsonar.login=$SONAR_TOKEN
-                                             '''
-                                  }
-
+                            withCredentials([string(credentialsId: 'sonarback', variable: 'SONAR_TOKEN')]) {
+                                sh '''
+                                    mvn clean package -DskipTests sonar:sonar \
+                                    -Dsonar.projectKey=backend \
+                                    -Dsonar.login=$SONAR_TOKEN
+                                '''
+                            }
                         }
 
                         timeout(time: 25, unit: 'MINUTES') {
                             waitForQualityGate abortPipeline: true
                         }
 
-                        notifyMail('SonarQube & Quality Gate', 'SUCCESS')
+                        notifyMail('SonarQube Backend', 'SUCCESS')
                     } catch (err) {
-                        notifyMail('SonarQube & Quality Gate', 'FAILED')
-                        error("SonarQube & Quality Gate stage failed")
+                        notifyMail('SonarQube Backend', 'FAILED')
+                        error("SonarQube Backend stage failed")
                     }
                 }
             }
         }
 
-        /* ================= NEXUS ================= */
-        stage('Upload to Nexus') {
+        /* =========================== UPLOAD NEXUS BACKEND ====================== */
+        stage('Upload to Nexus Backend') {
             steps {
                 script {
                     try {
@@ -113,7 +119,7 @@ pipeline {
                             nexusVersion: 'nexus3',
                             protocol: 'http',
                             nexusUrl: '172.31.15.219:8081',
-                            repository: 'compare-service',
+                            repository: 'backend',
                             credentialsId: 'Nexus',
                             groupId: 'com.devops',
                             version: "0.0.1-${BUILD_NUMBER}",
@@ -121,102 +127,88 @@ pipeline {
                                 [
                                     artifactId: 'numeric',
                                     classifier: '',
-                                    file: 'target/numeric-0.0.1.jar',
+                                    file: 'backend-souhir/target/numeric-0.0.1.jar',
                                     type: 'jar'
                                 ]
                             ]
                         )
-                        notifyMail('Upload to Nexus', 'SUCCESS')
+                        notifyMail('Upload Nexus Backend', 'SUCCESS')
                     } catch (err) {
-                        notifyMail('Upload to Nexus', 'FAILED')
+                        notifyMail('Upload Nexus Backend', 'FAILED')
                         error("Nexus upload failed")
                     }
                 }
             }
         }
-/* ================= Continuous Integration frontend ============================ */
-   
-   stage('Docker Build & Push Frontend') {
-    steps {
-        script {
-            try {
 
-                withCredentials([usernamePassword(
-                    credentialsId: 'DockerHub',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-
-                    sh '''
-                    ansible-playbook playbookfront.yml \
-                      --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
-                    '''
+        /* ======================= DOCKER FRONTEND via Ansible ================== */
+        stage('Docker Build & Push Frontend') {
+            steps {
+                script {
+                    try {
+                        withCredentials([usernamePassword(
+                            credentialsId: 'DockerHub',
+                            usernameVariable: 'DOCKER_USER',
+                            passwordVariable: 'DOCKER_PASS'
+                        )]) {
+                            sh '''
+                                ansible-playbook playbookfront.yml \
+                                --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
+                            '''
+                        }
+                        notifyMail('Docker Build & Push Frontend', 'SUCCESS')
+                    } catch (err) {
+                        notifyMail('Docker Build & Push Frontend', 'FAILED')
+                        error("Frontend Docker build failed")
+                    }
                 }
-
-                notifyMail('Build and push Frontend', 'SUCCESS')
-
-            } catch (err) {
-
-                notifyMail('Build and push', 'FAILED')
-                error("Frontend Docker build failed")
             }
         }
-    }
-}
-/* ================= Continuous Integration backend ========================== */
-     stage('Docker Build & Push Backend') {
-    steps {
-        script {
-            try {
 
-                withCredentials([usernamePassword(
-                    credentialsId: 'DockerHub',
-                    usernameVariable: 'DOCKER_USER',
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-
-                    sh '''
-                    ansible-playbook playbookback.yml \
-                      --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
-                    '''
+        /* ======================= DOCKER BACKEND via Ansible =================== */
+        stage('Docker Build & Push Backend') {
+            steps {
+                script {
+                    try {
+                        withCredentials([usernamePassword(
+                            credentialsId: 'DockerHub',
+                            usernameVariable: 'DOCKER_USER',
+                            passwordVariable: 'DOCKER_PASS'
+                        )]) {
+                            sh '''
+                                ansible-playbook playbookback.yml \
+                                --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
+                            '''
+                        }
+                        notifyMail('Docker Build & Push Backend', 'SUCCESS')
+                    } catch (err) {
+                        notifyMail('Docker Build & Push Backend', 'FAILED')
+                        error("Backend Docker build failed")
+                    }
                 }
+            }
+        }
 
-                notifyMail('Docker Build & Push Backend', 'SUCCESS')
-
-            } catch (err) {
-
-                notifyMail('Docker Build & Push Backend', 'FAILED')
-                error("Backend Docker build failed")
+        /* ======================= DEPLOY KUBERNETES via Ansible ================= */
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    try {
+                        sh """
+                            ansible-playbook -i inventory.yaml deploy-k8s.yml \
+                            -e image_tag=${BUILD_NUMBER}
+                        """
+                        notifyMail('Deploy to Kubernetes', 'SUCCESS')
+                    } catch (err) {
+                        notifyMail('Deploy to Kubernetes', 'FAILED')
+                        error("Kubernetes deployment failed")
+                    }
+                }
             }
         }
     }
-}                               
 
-/* ======================CONTINUOUS DEPLOY ============================= */
-       stage('Deploy to Kubernetes') {
-    steps {
-        script {
-            try {
-
-                sh """
-                    ansible-playbook -i inventory.yaml deploy-k8s.yaml \
-                    -e image_tag=${BUILD_NUMBER}
-                """
-
-                notifyMail('Deploy to k8s', 'SUCCESS')
-
-            } catch (err) {
-
-                notifyMail('Deploy to k8s', 'FAILED')
-                error("Deployment failed")
-
-            }
-        }
-    }
-}
-
-    }
-
+    /* ======================== POST PIPELINE ============================== */
     post {
         success {
             notifyMail('PIPELINE GLOBAL', 'SUCCESS')
@@ -226,9 +218,9 @@ pipeline {
         }
     }
 }
+
 /* ================= PREMIUM EMAIL FUNCTION ================= */
 def notifyMail(stageName, status) {
-
     def statusColor = (status == "SUCCESS") ? "#16a34a" : "#dc2626"
     def statusBg    = (status == "SUCCESS") ? "#dcfce7" : "#fee2e2"
     def statusIcon  = (status == "SUCCESS") ? "✅ SUCCESS" : "❌ FAILED"
@@ -244,94 +236,41 @@ def notifyMail(stageName, status) {
 <meta charset="UTF-8">
 </head>
 <body style="margin:0;padding:0;background-color:#f4f6f9;font-family:Arial,sans-serif;">
-
 <table width="100%" cellpadding="0" cellspacing="0">
-<tr>
-<td align="center">
-
+<tr><td align="center">
 <table width="650" cellpadding="0" cellspacing="0" style="background:#ffffff;margin:40px auto;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,0.1);overflow:hidden;">
-
-<!-- HEADER -->
-<tr>
-<td style="background:linear-gradient(90deg,#0f172a,#1e3a8a);padding:25px;text-align:center;color:white;">
+<tr><td style="background:linear-gradient(90deg,#0f172a,#1e3a8a);padding:25px;text-align:center;color:white;">
 <h1 style="margin:0;font-size:22px;">🚀 DevOps CI/CD Pipeline</h1>
 <p style="margin:5px 0 0 0;font-size:14px;opacity:0.8;">AWS • Docker • Kubernetes • Jenkins</p>
-</td>
-</tr>
-
-<!-- STATUS BADGE -->
-<tr>
-<td align="center" style="padding:25px;">
+</td></tr>
+<tr><td align="center" style="padding:25px;">
 <span style="background:${statusBg};color:${statusColor};padding:12px 25px;border-radius:30px;font-weight:bold;font-size:16px;">
 ${statusIcon}
 </span>
 <h2 style="margin-top:20px;color:#111827;">${stageName}</h2>
-</td>
-</tr>
-
-<!-- DETAILS TABLE -->
-<tr>
-<td style="padding:0 40px 30px 40px;">
+</td></tr>
+<tr><td style="padding:0 40px 30px 40px;">
 <table width="100%" cellpadding="10" cellspacing="0" style="border-collapse:collapse;font-size:14px;">
-
-<tr style="background:#f9fafb;">
-<td><strong>Project</strong></td>
-<td>AWS / Docker / Kubernetes CI/CD</td>
-</tr>
-
-<tr>
-<td><strong>Job Name</strong></td>
-<td>${env.JOB_NAME}</td>
-</tr>
-
-<tr style="background:#f9fafb;">
-<td><strong>Build Number</strong></td>
-<td>#${env.BUILD_NUMBER}</td>
-</tr>
-
-<tr>
-<td><strong>Image Tag</strong></td>
-<td>${env.BUILD_NUMBER}</td>
-</tr>
-
-<tr style="background:#f9fafb;">
-<td><strong>Execution Time</strong></td>
-<td>${currentBuild.durationString}</td>
-</tr>
-
-<tr>
-<td><strong>Triggered By</strong></td>
-<td>${currentBuild.getBuildCauses()[0].shortDescription}</td>
-</tr>
-
+<tr style="background:#f9fafb;"><td><strong>Project</strong></td><td>AWS / Docker / Kubernetes CI/CD</td></tr>
+<tr><td><strong>Job Name</strong></td><td>${env.JOB_NAME}</td></tr>
+<tr style="background:#f9fafb;"><td><strong>Build Number</strong></td><td>#${env.BUILD_NUMBER}</td></tr>
+<tr><td><strong>Image Tag</strong></td><td>${env.BUILD_NUMBER}</td></tr>
+<tr style="background:#f9fafb;"><td><strong>Execution Time</strong></td><td>${currentBuild.durationString}</td></tr>
+<tr><td><strong>Triggered By</strong></td><td>${currentBuild.getBuildCauses()[0].shortDescription}</td></tr>
 </table>
-</td>
-</tr>
-
-<!-- BUTTON -->
-<tr>
-<td align="center" style="padding-bottom:30px;">
-<a href="${env.BUILD_URL}" 
-style="background:#1e40af;color:white;padding:12px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">
+</td></tr>
+<tr><td align="center" style="padding-bottom:30px;">
+<a href="${env.BUILD_URL}" style="background:#1e40af;color:white;padding:12px 30px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">
 🔎 View Build Details
 </a>
-</td>
-</tr>
-
-<!-- FOOTER -->
-<tr>
-<td style="background:#f3f4f6;padding:20px;text-align:center;font-size:12px;color:#6b7280;">
+</td></tr>
+<tr><td style="background:#f3f4f6;padding:20px;text-align:center;font-size:12px;color:#6b7280;">
 <p style="margin:0;">Automated DevOps Pipeline</p>
 <p style="margin:5px 0 0 0;">👩‍💻 Souhir | Cloud & DevOps Engineer</p>
-</td>
-</tr>
-
+</td></tr>
 </table>
-
-</td>
-</tr>
+</td></tr>
 </table>
-
 </body>
 </html>
 """
