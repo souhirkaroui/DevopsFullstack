@@ -4,15 +4,15 @@ metadata:
   name: my-app-ingress
   namespace: my-app
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
   ingressClassName: nginx
   rules:
     - host: myapp.local
       http:
         paths:
-          # Toutes les routes /api/... vont vers le backend
-          - path: /api(/|$)(.*)
+          # Backend: tout ce qui commence par /api va vers backend
+          - path: /api
             pathType: Prefix
             backend:
               service:
@@ -20,8 +20,8 @@ spec:
                 port:
                   number: 8080
 
-          # Tout le reste va vers le frontend
-          - path: /(.*)
+          # Frontend: tout le reste va vers frontsvc
+          - path: /
             pathType: Prefix
             backend:
               service:
