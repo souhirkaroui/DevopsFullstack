@@ -190,19 +190,16 @@ pipeline {
             }
         }
     }
-}                 
+}                               
 
-    
-                  
-    
-     /* =================CONTINUOUS DEPLOY ================= */
+/* ======================CONTINUOUS DEPLOY ============================= */
        stage('Deploy to Kubernetes') {
     steps {
         script {
             try {
 
                 sh """
-                    ansible-playbook -i inventory.yaml playbook.yaml \
+                    ansible-playbook -i inventory.yaml deploy-k8s.yaml \
                     -e image_tag=${BUILD_NUMBER}
                 """
 
@@ -229,7 +226,6 @@ pipeline {
         }
     }
 }
-
 /* ================= PREMIUM EMAIL FUNCTION ================= */
 def notifyMail(stageName, status) {
 
