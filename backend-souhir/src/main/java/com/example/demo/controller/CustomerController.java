@@ -10,7 +10,7 @@ import java.util.List;
 // CORS configuré pour le frontend via Ingress
 @CrossOrigin(origins = "http://myapp.local")  // autorise toutes les méthodes par défaut
 @RestController
-@RequestMapping("/customers")
+@RequestMapping("/api/customers")
 public class CustomerController {
 
     @Autowired
