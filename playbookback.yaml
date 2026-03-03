@@ -1,0 +1,37 @@
+---
+- name: Build and Push Backend Image
+  hosts: localhost
+  become: false
+
+  vars:
+    image_name: "{{ dockerhub_user }}/backend"
+    image_tag: "{{ lookup('env','BUILD_NUMBER') | default('latest') }}"
+    project_path: "./backend-souhir"
+
+  tasks:
+
+    - name: Login to DockerHub
+      community.docker.docker_login:
+        username: "{{ dockerhub_user }}"
+        password: "{{ dockerhub_password }}"
+
+    - name: Build and push backend image
+      community.docker.docker_image:
+        name: "{{ image_name }}"
+        tag: "{{ image_tag }}"
+        source: build
+        force_source: true
+        build:
+          path: "{{ project_path }}"
+        push: true
+
+    - name: Tag backend latest
+      community.docker.docker_image:
+        name: "{{ image_name }}"
+        tag: latest
+        source: local
+        push: true
+
+    - name: Logout Docker
+      community.docker.docker_login:
+        state: absent
