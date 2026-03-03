@@ -47,6 +47,5 @@ spec:
     app: backend
   ports:
     - port: 8080  # Port interne Kubernetes
-      protocol: TCP
       targetPort: 8080  # Port du container
   type: ClusterIP        
