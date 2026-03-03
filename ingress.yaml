@@ -4,9 +4,7 @@ metadata:
   name: my-app-ingress
   namespace: my-app
   annotations:
-    # Très important pour éviter les conflits de redirection
     nginx.ingress.kubernetes.io/use-regex: "true"
-    # Augmente le timeout si le backend met du temps à répondre
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
 spec:
   ingressClassName: nginx
@@ -14,25 +12,6 @@ spec:
     - host: myapp.local
       http:
         paths:
-          # 1. Backend : Capturer /api et tout ce qui suit
-          - path: /api(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: backendsvc
-                port:
-                  number: 8080
-          # 2. Frontend : Tout le reste
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: frontsvc
-                port:
-                  number: 80
-    # Règle par défaut (sans host)
-    - http:
-        paths:
           - path: /api(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
@@ -47,4 +26,3 @@ spec:
                 name: frontsvc
                 port:
                   number: 80
-Utilisez le code avec précaution.
