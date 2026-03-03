@@ -3,22 +3,26 @@ kind: Ingress
 metadata:
   name: my-app-ingress
   namespace: my-app
+  annotations:
+    # Très important pour éviter les conflits de redirection
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    # Augmente le timeout si le backend met du temps à répondre
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
 spec:
   ingressClassName: nginx
   rules:
-    # Règle 1 : Avec le domaine myapp.local
     - host: myapp.local
       http:
         paths:
-          # Backend Spring Boot (mettre AVANT le frontend)
-          - path: /api
-            pathType: Prefix
+          # 1. Backend : Capturer /api et tout ce qui suit
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: backendsvc
                 port:
                   number: 8080
-          # Frontend Angular
+          # 2. Frontend : Tout le reste
           - path: /
             pathType: Prefix
             backend:
@@ -26,19 +30,16 @@ spec:
                 name: frontsvc
                 port:
                   number: 80
-    
-    # Règle 2 : Sans host (accepte l'IP publique)
+    # Règle par défaut (sans host)
     - http:
         paths:
-          # Backend Spring Boot
-          - path: /api
-            pathType: Prefix
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
             backend:
               service:
                 name: backendsvc
                 port:
                   number: 8080
-          # Frontend Angular
           - path: /
             pathType: Prefix
             backend:
@@ -46,3 +47,4 @@ spec:
                 name: frontsvc
                 port:
                   number: 80
+Utilisez le code avec précaution.
