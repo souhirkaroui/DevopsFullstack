@@ -1,7 +1,7 @@
 ---
 - name: Build and Push Backend Image
   hosts: localhost
-  become: false
+  become: true
 
   vars:
     image_name: "{{ dockerhub_user }}/backend"
