@@ -241,7 +241,7 @@ pipeline {
                     try {
                         sh """
 
-                           source /var/lib/jenkins/ansible-venv/bin/activate
+                           . /var/lib/jenkins/ansible-venv/bin/activate
                            ansible-playbook -i inventory.yaml deploy-k8s.yaml \
                             -e image_tag=${BUILD_NUMBER}
                         """
