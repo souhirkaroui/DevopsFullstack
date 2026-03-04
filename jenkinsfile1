@@ -82,33 +82,73 @@ pipeline {
             }
         }
 
-        /* ======================= SONARQUBE BACKEND ============================ */
+        /* ============================= SONARQUBE BACKEND ================================== */
         stage('SonarQube & Quality Gate Backend') {
-            steps {
-                script {
-                    try {
-                        withSonarQubeEnv('SonarQube') {
-                            withCredentials([string(credentialsId: 'sonarback', variable: 'SONAR_TOKEN')]) {
-                                sh '''
-                                    mvn clean package -DskipTests sonar:sonar \
-                                    -Dsonar.projectKey=backend \
-                                    -Dsonar.login=$SONAR_TOKEN
+         steps {
+           script {
+               try {
+                dir('backend-souhir') {    // <-- important
+                    withSonarQubeEnv('SonarQube') {
+                        withCredentials([string(credentialsId: 'sonarback', variable: 'SONAR_TOKEN')]) {
+                             sh '''
+                                  mvn clean package -DskipTests sonar:sonar \
+                                  -Dsonar.projectKey=kubernetes \
+                                  -Dsonar.login=$SONAR_TOKEN
                                 '''
-                            }
                         }
-
-                        timeout(time: 25, unit: 'MINUTES') {
-                            waitForQualityGate abortPipeline: true
-                        }
-
-                        notifyMail('SonarQube Backend', 'SUCCESS')
-                    } catch (err) {
-                        notifyMail('SonarQube Backend', 'FAILED')
-                        error("SonarQube Backend stage failed")
                     }
+                }
+
+                timeout(time: 25, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+
+                notifyMail('SonarQube Backend', 'SUCCESS')
+            } catch (err) {
+                notifyMail('SonarQube Backend', 'FAILED')
+                error("SonarQube Backend stage failed")
+            }
+        }
+    }
+}
+
+        /* ============================= SONARQUBE FONTEND ================================== */
+
+    stage('SonarQube Frontend') {
+        steps {
+           dir('frontend-souhir') {
+            script {
+                try {
+                    // Utiliser le token stocké dans Jenkins credentials
+                    withCredentials([string(credentialsId: 'sonarfront', variable: 'SONAR_TOKEN')]) {
+
+                        // Lancer l'analyse avec sonar-scanner
+                        sh '''
+                            sonar-scanner \
+                                -Dsonar.projectKey=front \
+                                -Dsonar.projectName=" Frontend" \
+                                -Dsonar.sources=. \
+                                -Dsonar.host.url=http://35.180.44.72:9000 \
+                                -Dsonar.login=$SONAR_TOKEN
+                        '''
+                    }
+
+                    // Attendre le résultat du Quality Gate
+                    timeout(time: 15, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true
+                    }
+
+                    notifyMail('Sonar Frontend', 'SUCCESS')
+
+                } catch (err) {
+                    notifyMail('Sonar Frontend', 'FAILED')
+                    error("Sonar Frontend failed")
                 }
             }
         }
+    }
+}
+
 
         /* =========================== UPLOAD NEXUS BACKEND ====================== */
         stage('Upload to Nexus Backend') {
