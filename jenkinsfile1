@@ -123,18 +123,20 @@ pipeline {
             script {
                 try {
                     // Utiliser le token stocké dans Jenkins credentials
+                    withSonarQubeEnv('SonarQube') {
+                    // Utilise l'outil SonarScanner installé
+                    def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
                     withCredentials([string(credentialsId: 'sonarfront', variable: 'SONAR_TOKEN')]) {
-
-                        // Lancer l'analyse avec sonar-scanner
-                        sh '''
-                            sonar-scanner \
-                                -Dsonar.projectKey=front \
-                                -Dsonar.projectName=" front" \
-                                -Dsonar.sources=. \
-                                -Dsonar.host.url=http://35.180.44.72:9000 \
-                                -Dsonar.login=$SONAR_TOKEN
-                        '''
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=front \
+                            -Dsonar.projectName=front \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=http://35.180.44.72:9000 \
+                            -Dsonar.login=$SONAR_TOKEN
+                        """
                     }
+                }
 
                     // Attendre le résultat du Quality Gate
                     timeout(time: 15, unit: 'MINUTES') {
