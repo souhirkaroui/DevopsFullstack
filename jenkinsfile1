@@ -141,7 +141,7 @@ pipeline {
                     // Attendre le résultat du Quality Gate
                    // timeout(time: 15, unit: 'MINUTES') {
                     //    waitForQualityGate abortPipeline: true
-                    }
+                   // }
 
                     notifyMail('Sonar Frontend', 'SUCCESS')
 
