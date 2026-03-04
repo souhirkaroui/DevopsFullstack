@@ -92,7 +92,7 @@ pipeline {
                         withCredentials([string(credentialsId: 'sonarback', variable: 'SONAR_TOKEN')]) {
                              sh '''
                                   mvn clean package -DskipTests sonar:sonar \
-                                  -Dsonar.projectKey=kubernetes \
+                                  -Dsonar.projectKey=backend \
                                   -Dsonar.login=$SONAR_TOKEN
                                 '''
                         }
@@ -126,7 +126,7 @@ pipeline {
                         sh '''
                             sonar-scanner \
                                 -Dsonar.projectKey=front \
-                                -Dsonar.projectName=" Frontend" \
+                                -Dsonar.projectName=" front" \
                                 -Dsonar.sources=. \
                                 -Dsonar.host.url=http://35.180.44.72:9000 \
                                 -Dsonar.login=$SONAR_TOKEN
