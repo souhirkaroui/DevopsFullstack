@@ -2,6 +2,9 @@
 - name: Deploy Fullstack Application to Kubernetes
   hosts: localhost
   become: true
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+    
   vars:
     kubeconfig_path: "{{ lookup('env','KUBECONFIG') }}"
     namespace_file: "namespace.yaml"
