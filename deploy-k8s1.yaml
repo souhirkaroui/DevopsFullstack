@@ -12,6 +12,10 @@
     # Namespace
     - name: Apply Namespace
       command: kubectl apply -f namespace.yaml
+      
+     # delete deployment
+    - name: delete deployment
+      command: kubectl delete deployment --all -n my-app
 
     # Database
     - name: Delete existing MySQL resources (ignore if not exists)
