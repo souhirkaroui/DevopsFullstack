@@ -132,7 +132,7 @@ pipeline {
                             -Dsonar.projectKey=front \
                             -Dsonar.projectName=front \
                             -Dsonar.sources=. \
-                            -Dsonar.host.url=http://35.180.44.72:9000 \
+                            -Dsonar.host.url=http://172.31.15.219:9000 \
                             -Dsonar.login=$SONAR_TOKEN
                         """
                     }
