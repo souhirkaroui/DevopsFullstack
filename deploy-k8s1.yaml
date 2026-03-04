@@ -10,9 +10,6 @@
   tasks:
 
     # Namespace
-    - name: Delete existing namespace (ignore if not exists)
-      command: kubectl delete namespace $(cat namespace.yaml | grep name | awk '{print $2}') --ignore-not-found=true
-
     - name: Apply Namespace
       command: kubectl apply -f namespace.yaml
 
