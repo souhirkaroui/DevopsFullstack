@@ -33,7 +33,7 @@
     - name: Delete existing Backend Deployment and Service
       command: |
         kubectl delete deployment backend-deploy --ignore-not-found=true
-        kubectl delete service backend-svc --ignore-not-found=true
+        kubectl delete service backendsvc --ignore-not-found=true
 
     - name: Apply Backend Deployment
       command: kubectl apply -f backend-souhir/backenddeploy.yaml
@@ -42,7 +42,7 @@
     - name: Delete existing Frontend Deployment and Service
       command: |
         kubectl delete deployment frontend-deploy --ignore-not-found=true
-        kubectl delete service frontend-svc --ignore-not-found=true
+        kubectl delete service frontsvc --ignore-not-found=true
 
     - name: Apply Frontend Deployment
       command: kubectl apply -f frontend-souhir/frontdeploy.yaml
