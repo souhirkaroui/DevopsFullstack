@@ -240,7 +240,9 @@ pipeline {
                 script {
                     try {
                         sh """
-                            ansible-playbook -i inventory.yaml deploy-k8s.yaml \
+
+                           source /var/lib/jenkins/ansible-venv/bin/activate
+                           ansible-playbook -i inventory.yaml deploy-k8s.yaml \
                             -e image_tag=${BUILD_NUMBER}
                         """
                         notifyMail('Deploy to Kubernetes', 'SUCCESS')
