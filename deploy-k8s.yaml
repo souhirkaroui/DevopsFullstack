@@ -1,7 +1,7 @@
 ---
 - name: Deploy Fullstack Application to Kubernetes
   hosts: localhost
-  become: false
+  become: true
   vars:
     kubeconfig_path: "{{ lookup('env','KUBECONFIG') }}"
     namespace_file: "namespace.yaml"
@@ -13,47 +13,47 @@
   tasks:
 
     - name: Apply Namespace
-      community.kubernetes.k8s:
+      kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
         src: "{{ namespace_file }}"
 
     # Database
     - name: Apply MySQL Secret
-      community.kubernetes.k8s:
+      kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
         src: "{{ db_path }}/mysql-secret.yaml"
 
     - name: Apply MySQL Storage
-      community.kubernetes.k8s:
+      kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
         src: "{{ db_path }}/mysql-storage.yaml"
 
     - name: Apply MySQL Deployment
-      community.kubernetes.k8s:
+      kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
         src: "{{ db_path }}/mysql-deployment.yaml"
 
     # Backend
     - name: Apply Backend Deployment
-      community.kubernetes.k8s:
+      kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
         src: "{{ backend_path }}/backenddeploy.yaml"
 
     # Frontend
     - name: Apply Frontend Deployment
-      community.kubernetes.k8s:
+      kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
         src: "{{ frontend_path }}/frontdeploy.yaml"
 
     # Ingress
     - name: Apply Ingress
-      community.kubernetes.k8s:
+      kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
         src: "{{ ingress_file }}"
