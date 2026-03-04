@@ -104,7 +104,7 @@ pipeline {
                 echo "SonarQube Quality Gate status: ${qg.status}"
                // Ne pas abort pour laisser passer le pipeline
               }
-                }
+              
 
                 notifyMail('SonarQube Backend', 'SUCCESS')
             } catch (err) {
