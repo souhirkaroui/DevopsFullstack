@@ -197,7 +197,7 @@ pipeline {
                             passwordVariable: 'DOCKER_PASS'
                         )]) {
                             sh '''
-                                ansible-playbook playbookfront.yml \
+                                ansible-playbook playbookfront.yaml \
                                 --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
                             '''
                         }
@@ -221,7 +221,7 @@ pipeline {
                             passwordVariable: 'DOCKER_PASS'
                         )]) {
                             sh '''
-                                ansible-playbook playbookback.yml \
+                                ansible-playbook playbookback.yaml \
                                 --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
                             '''
                         }
@@ -240,7 +240,7 @@ pipeline {
                 script {
                     try {
                         sh """
-                            ansible-playbook -i inventory.yaml deploy-k8s.yml \
+                            ansible-playbook -i inventory.yaml deploy-k8s.yaml \
                             -e image_tag=${BUILD_NUMBER}
                         """
                         notifyMail('Deploy to Kubernetes', 'SUCCESS')
