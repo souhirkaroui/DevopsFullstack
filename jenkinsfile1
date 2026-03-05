@@ -96,11 +96,12 @@ stage('SonarQube & Quality Gate Backend') {
                                 -Dsonar.projectKey=backend \
                                 -Dsonar.login=$SONAR_TOKEN
                             '''
-                        }
+                        
 
                         // ✅ Quality Gate DANS withSonarQubeEnv
                         timeout(time: 15, unit: 'MINUTES') {
                             waitForQualityGate abortPipeline: true
+                          }
                         }
                     }
                 }
@@ -133,7 +134,7 @@ stage('SonarQube & Quality Gate Frontend') {
                                 -Dsonar.host.url=http://172.31.15.219:9000 \
                                 -Dsonar.login=$SONAR_TOKEN
                             """
-                        }
+                      
 
                         // ✅ Quality Gate DANS withSonarQubeEnv
                         timeout(time: 15, unit: 'MINUTES') {
@@ -141,7 +142,7 @@ stage('SonarQube & Quality Gate Frontend') {
                         }
                     }
                 }
-
+              }
                 notifyMail('Sonar Frontend', 'SUCCESS')
 
             } catch (err) {
