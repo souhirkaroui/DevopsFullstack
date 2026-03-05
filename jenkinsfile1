@@ -83,32 +83,35 @@ pipeline {
         }
 
         /* ============================= SONARQUBE BACKEND ================================== */
-        stage('SonarQube & Quality Gate Backend') {
-         steps {
-           script {
-               try {
-                dir('backend-souhir') {    // <-- important
+    stage('SonarQube & Quality Gate Backend') {
+    steps {
+        script {
+            try {
+
+                dir('backend-souhir') {
                     withSonarQubeEnv('SonarQube') {
                         withCredentials([string(credentialsId: 'sonarback', variable: 'SONAR_TOKEN')]) {
-                             sh '''
-                                  mvn clean package -DskipTests sonar:sonar \
-                                  -Dsonar.projectKey=backend \
-                                  -Dsonar.login=$SONAR_TOKEN
-                                '''
+                            sh '''
+                                mvn clean package -DskipTests sonar:sonar \
+                                -Dsonar.projectKey=backend \
+                                -Dsonar.login=$SONAR_TOKEN
+                            '''
                         }
                     }
                 }
 
-                     // Attendre le résultat du Quality Gate
-                       timeout(time: 15, unit: 'MINUTES') {
-                        waitForQualityGate abortPipeline: true
-                     }
-              
+                // Attendre le résultat du Quality Gate
+                timeout(time: 15, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
 
                 notifyMail('SonarQube Backend', 'SUCCESS')
+
             } catch (err) {
+
                 notifyMail('SonarQube Backend', 'FAILED')
-                error("SonarQube Backend stage failed")
+                error("SonarQube Backend stage failed: ${err}")
+
             }
         }
     }
@@ -116,7 +119,7 @@ pipeline {
 
         /* ============================= SONARQUBE FONTEND ================================== */
 
-    stage('SonarQube Frontend') {
+    stage('SonarQube Frontend & Quality Gate Backend') {
         steps {
            dir('frontend-souhir') {
             script {
