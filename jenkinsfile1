@@ -82,76 +82,67 @@ pipeline {
             }
         }
 
-      /* ============================= SONARQUBE BACKEND ================================== */
-
-stage('SonarQube & Quality Gate Backend') {
-    steps {
-        script {
-            try {
-                dir('backend-souhir') {
-                    withSonarQubeEnv('SonarQube') {
-                        withCredentials([string(credentialsId: 'sonarback', variable: 'SONAR_TOKEN')]) {
-                            sh '''
-                                mvn clean package -DskipTests sonar:sonar \
-                                -Dsonar.projectKey=backend \
-                                -Dsonar.login=$SONAR_TOKEN
-                            '''
-                        
-
-                        // ✅ Quality Gate DANS withSonarQubeEnv
-                        timeout(time: 15, unit: 'MINUTES') {
-                            waitForQualityGate abortPipeline: true
-                          }
-                        }
+        /* ============================= SONARQUBE BACKEND ================================== */
+        stage('SonarQube & Quality Gate Backend') {
+            steps {
+                script {
+                    try {
+                        dir('backend-souhir') {
+                            withSonarQubeEnv('SonarQube') {
+                                withCredentials([string(credentialsId: 'sonarback', variable: 'SONAR_TOKEN')]) {
+                                    sh '''
+                                        mvn clean package -DskipTests sonar:sonar \
+                                        -Dsonar.projectKey=backend \
+                                        -Dsonar.login=$SONAR_TOKEN
+                                    '''
+                                } // ← ferme withCredentials
+                                // ✅ Quality Gate DANS withSonarQubeEnv mais HORS withCredentials
+                                timeout(time: 15, unit: 'MINUTES') {
+                                    waitForQualityGate abortPipeline: true
+                                }
+                            } // ← ferme withSonarQubeEnv
+                        } // ← ferme dir
+                        notifyMail('SonarQube Backend', 'SUCCESS')
+                    } catch (err) {
+                        notifyMail('SonarQube Backend', 'FAILED')
+                        error("SonarQube Backend stage failed: ${err}")
                     }
                 }
-
-                notifyMail('SonarQube Backend', 'SUCCESS')
-
-            } catch (err) {
-                notifyMail('SonarQube Backend', 'FAILED')
-                error("SonarQube Backend stage failed: ${err}")
             }
         }
-    }
-}
 
-/* ============================= SONARQUBE FRONTEND ================================== */
-stage('SonarQube & Quality Gate Frontend') {
-    steps {
-        script {
-            try {
-                dir('frontend-souhir') {
-                    withSonarQubeEnv('SonarQube') {
-                        def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-
-                        withCredentials([string(credentialsId: 'sonarfront', variable: 'SONAR_TOKEN')]) {
-                            sh """
-                                ${scannerHome}/bin/sonar-scanner \
-                                -Dsonar.projectKey=front \
-                                -Dsonar.projectName=front \
-                                -Dsonar.sources=. \
-                                -Dsonar.host.url=http://172.31.15.219:9000 \
-                                -Dsonar.login=$SONAR_TOKEN
-                            """
-                      
-
-                        // ✅ Quality Gate DANS withSonarQubeEnv
-                        timeout(time: 15, unit: 'MINUTES') {
-                            waitForQualityGate abortPipeline: true
-                        }
+        /* ============================= SONARQUBE FRONTEND ================================== */
+        stage('SonarQube & Quality Gate Frontend') {
+            steps {
+                script {
+                    try {
+                        dir('frontend-souhir') {
+                            withSonarQubeEnv('SonarQube') {
+                                def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                                withCredentials([string(credentialsId: 'sonarfront', variable: 'SONAR_TOKEN')]) {
+                                    sh """
+                                        ${scannerHome}/bin/sonar-scanner \
+                                        -Dsonar.projectKey=front \
+                                        -Dsonar.projectName=front \
+                                        -Dsonar.sources=. \
+                                        -Dsonar.host.url=http://172.31.15.219:9000 \
+                                        -Dsonar.login=$SONAR_TOKEN
+                                    """
+                                } // ← ferme withCredentials
+                                // ✅ Quality Gate DANS withSonarQubeEnv mais HORS withCredentials
+                                timeout(time: 15, unit: 'MINUTES') {
+                                    waitForQualityGate abortPipeline: true
+                                }
+                            } // ← ferme withSonarQubeEnv
+                        } // ← ferme dir
+                        notifyMail('Sonar Frontend', 'SUCCESS')
+                    } catch (err) {
+                        notifyMail('Sonar Frontend', 'FAILED')
+                        error("SonarQube Frontend stage failed: ${err}")
                     }
                 }
-              }
-                notifyMail('Sonar Frontend', 'SUCCESS')
-
-            } catch (err) {
-                notifyMail('Sonar Frontend', 'FAILED')
-                error("SonarQube Frontend stage failed: ${err}")
             }
         }
-    }
-}
 
 
         /* =========================== UPLOAD NEXUS BACKEND ====================== */
