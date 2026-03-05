@@ -1,12 +1,16 @@
----
+############################################
+# Deploy Fullstack Application to Kubernetes
+############################################
+
 - name: Deploy Fullstack Application to Kubernetes
   hosts: localhost
   become: true
+
   environment:
     KUBECONFIG: /home/ubuntu/.kube/config
-    
+
   vars:
-    kubeconfig_path: "{{ lookup('env','KUBECONFIG') }}"
+    kubeconfig_path: "{{ lookup('env','KUBECONFIG') | default('/home/ubuntu/.kube/config', true) }}"
     namespace_file: "namespace.yaml"
     db_path: "database"
     backend_path: "backend-souhir"
@@ -15,11 +19,31 @@
 
   tasks:
 
+    # Namespace
     - name: Apply Namespace
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
         src: "{{ namespace_file }}"
+
+    # Delete old resources
+    - name: Delete old Backend
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        state: absent
+        src: "{{ backend_path }}/backenddeploy.yaml"
+
+    - name: Delete old Frontend
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        state: absent
+        src: "{{ frontend_path }}/frontdeploy.yaml"
+
+    - name: Delete old Ingress
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        state: absent
+        src: "{{ ingress_file }}"
 
     # Database
     - name: Apply MySQL Secret
