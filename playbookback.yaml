@@ -7,8 +7,15 @@
     image_name: "{{ dockerhub_user }}/backend"
     image_tag: "{{ lookup('env','BUILD_NUMBER') | default('latest') }}"
     project_path: "./backend-souhir"
+    container_name: backend-container
 
   tasks:
+
+    - name: Stop and remove Backend container if exists
+      community.docker.docker_container:
+        name: "{{ container_name }}"
+        state: absent
+        force_kill: true
 
     - name: Login to DockerHub
       community.docker.docker_login:
