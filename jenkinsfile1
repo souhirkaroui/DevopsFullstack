@@ -99,11 +99,10 @@ pipeline {
                     }
                 }
 
-               // timeout(time: 25, unit: 'MINUTES') {
-               // def qg = waitForQualityGate()
-              //  echo "SonarQube Quality Gate status: ${qg.status}"
-               // Ne pas abort pour laisser passer le pipeline
-             // }
+                     // Attendre le résultat du Quality Gate
+                       timeout(time: 15, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true
+                     }
               
 
                 notifyMail('SonarQube Backend', 'SUCCESS')
@@ -139,9 +138,9 @@ pipeline {
                 }
 
                     // Attendre le résultat du Quality Gate
-                   // timeout(time: 15, unit: 'MINUTES') {
-                    //    waitForQualityGate abortPipeline: true
-                   // }
+                       timeout(time: 15, unit: 'MINUTES') {
+                        waitForQualityGate abortPipeline: true
+                     }
 
                     notifyMail('Sonar Frontend', 'SUCCESS')
 
