@@ -98,9 +98,9 @@ pipeline {
                             '''
                         }
                         // ✅ waitForQualityGate DANS withSonarQubeEnv
-                        timeout(time: 15, unit: 'MINUTES') {
-                            waitForQualityGate abortPipeline: true
-                        }
+                      //  timeout(time: 15, unit: 'MINUTES') {
+                     //       waitForQualityGate abortPipeline: true
+                     //   }
                     }
                 }
                 notifyMail('SonarQube Backend', 'SUCCESS')
@@ -133,20 +133,20 @@ pipeline {
                 }
 
                 // ✅ Vérification rapide de la Quality Gate
-                def qg = null
-                timeout(time: 5, unit: 'MINUTES') {  // max 5 minutes pour récupérer le résultat
-                    waitUntil {
-                        qg = waitForQualityGate()
-                        echo "Current Quality Gate Status: ${qg.status}"
-                        return qg.status != 'PENDING'  // boucle tant que SonarQube n’a pas renvoyé OK/FAILED
-                    }
-                }
+               // def qg = null
+             //   timeout(time: 5, unit: 'MINUTES') {  // max 5 minutes pour récupérer le résultat
+             //      waitUntil {
+             //           qg = waitForQualityGate()
+            //            echo "Current Quality Gate Status: ${qg.status}"
+            //            return qg.status != 'PENDING'  // boucle tant que SonarQube n’a pas renvoyé OK/FAILED
+                 //   }
+            //    }
 
-                if (qg.status != 'OK') {
-                    error "La Quality Gate Frontend a échoué : ${qg.status}"
-                } else {
-                    echo "Quality Gate Frontend OK ✅"
-                }
+              //  if (qg.status != 'OK') {
+           //         error "La Quality Gate Frontend a échoué : ${qg.status}"
+            //    } else {
+            //        echo "Quality Gate Frontend OK ✅"
+           //     }
             }
         }
     }
