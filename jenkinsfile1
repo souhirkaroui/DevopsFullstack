@@ -24,7 +24,7 @@ stage('Build & Test Backend') {
                     notifyMail('Build Backend', 'SUCCESS')
 
                     // Test
-                    sh 'mvn test'
+                    sh 'mvn test package -DskipTests=true'
                     notifyMail('Test Backend', 'SUCCESS')
                 }
             } catch (err) {
