@@ -3,14 +3,13 @@
 ############################################
 
 - name: Deploy Fullstack Application to Kubernetes
-  hosts: localhost
+  hosts: kubernetes
   become: true
-
   environment:
     KUBECONFIG: /home/ubuntu/.kube/config
 
   vars:
-    kubeconfig_path: "{{ lookup('env','KUBECONFIG') | default('/home/ubuntu/.kube/config', true) }}"
+    kubeconfig_path: "{{ lookup('env','KUBECONFIG') }}"
     namespace_file: "namespace.yaml"
     db_path: "database"
     backend_path: "backend-souhir"
@@ -19,33 +18,42 @@
 
   tasks:
 
+    ###################################
     # Namespace
+    ###################################
     - name: Apply Namespace
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
         src: "{{ namespace_file }}"
 
+    ###################################
     # Delete old resources
+    ###################################
     - name: Delete old Backend
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: absent
         src: "{{ backend_path }}/backenddeploy.yaml"
+      ignore_errors: yes
 
     - name: Delete old Frontend
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: absent
         src: "{{ frontend_path }}/frontdeploy.yaml"
+      ignore_errors: yes
 
     - name: Delete old Ingress
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: absent
         src: "{{ ingress_file }}"
+      ignore_errors: yes
 
+    ###################################
     # Database
+    ###################################
     - name: Apply MySQL Secret
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
@@ -64,21 +72,27 @@
         state: present
         src: "{{ db_path }}/mysql-deployment.yaml"
 
+    ###################################
     # Backend
+    ###################################
     - name: Apply Backend Deployment
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
         src: "{{ backend_path }}/backenddeploy.yaml"
 
+    ###################################
     # Frontend
+    ###################################
     - name: Apply Frontend Deployment
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
         src: "{{ frontend_path }}/frontdeploy.yaml"
 
+    ###################################
     # Ingress
+    ###################################
     - name: Apply Ingress
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
