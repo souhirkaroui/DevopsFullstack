@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -25,8 +24,9 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Optional<Customer> getCustomerById(Long id) {
-        return repository.findById(id);
+    public Customer getCustomerById(Long id) {
+        // Retourne null si le client n'existe pas, compatible avec l'interface
+        return repository.findById(id).orElse(null);
     }
 
     @Override
