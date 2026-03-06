@@ -115,7 +115,7 @@ stage('Quality Gate') {
             steps {
                 script {
                     try {
-                        timeout(time: 5, unit: 'MINUTES') {
+                        timeout(time: 15, unit: 'MINUTES') {
                             waitForQualityGate abortPipeline: true
                         }
                         currentBuild.description = updateStageStatus(currentBuild.description, 'Quality', 'SUCCESS')
