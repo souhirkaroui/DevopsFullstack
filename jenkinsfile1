@@ -93,7 +93,8 @@ pipeline {
                             sh '''
                                 mvn clean package -DskipTests sonar:sonar \
                                 -Dsonar.projectKey=backend \
-                                -Dsonar.login=$SONAR_TOKEN
+                                -Dsonar.login=$SONAR_TOKEN \
+                                -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
                             '''
                         }
                     }
