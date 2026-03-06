@@ -13,39 +13,33 @@ pipeline {
 
     stages {
 
-        /* =========================== BUILD BACKEND ============================= */
-        stage('Build Backend') {
-            steps {
-                script {
-                    try {
-                        dir('backend-souhir') {
-                            sh 'mvn clean package -DskipTests=true'
-                        }
-                        notifyMail('Build Backend', 'SUCCESS')
-                    } catch (err) {
-                        notifyMail('Build Backend', 'FAILED')
-                        error("Build Backend failed")
-                    }
-                }
-            }
-        }
+       /* ====================== BUILD & TEST BACKEND ======================= */
+stage('Build & Test Backend') {
+    steps {
+        script {
+            try {
+                dir('backend-souhir') {
+                    // Build
+                    sh 'mvn clean package -DskipTests=true'
+                    notifyMail('Build Backend', 'SUCCESS')
 
-        /* ============================= TEST BACKEND ========================== */
-        stage('Test Backend') {
-            steps {
-                script {
-                    try {
-                        dir('backend-souhir') {
-                            sh 'mvn test package -DskipTests=true'
-                        }
-                        notifyMail('Test Backend', 'SUCCESS')
-                    } catch (err) {
-                        notifyMail('Test Backend', 'FAILED')
-                        error("Test Backend failed")
-                    }
+                    // Test
+                    sh 'mvn test'
+                    notifyMail('Test Backend', 'SUCCESS')
+                }
+            } catch (err) {
+                // On détecte si l'erreur est sur le build ou le test
+                if (err.toString().contains('BUILD FAILURE')) {
+                    notifyMail('Build Backend', 'FAILED')
+                    error("Build Backend failed")
+                } else {
+                    notifyMail('Test Backend', 'FAILED')
+                    error("Test Backend failed")
                 }
             }
         }
+    }
+}
 
         /* =========================== BUILD FRONTEND ============================ */
         stage('Build Frontend') {
