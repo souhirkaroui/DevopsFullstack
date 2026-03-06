@@ -111,7 +111,7 @@ pipeline {
                 }
             }
         }
-}
+
 
         /* ============================= SONARQUBE FRONTEND ================================== */
   stage('SonarQube & Quality Gate Frontend') {
