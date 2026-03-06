@@ -92,27 +92,34 @@ pipeline {
                         withCredentials([string(credentialsId: 'sonarback', variable: 'SONAR_TOKEN')]) {
                             sh '''
                                 mvn clean package -DskipTests sonar:sonar \
-                                -Dsonar.projectKey=backend \
-                                -Dsonar.login=$SONAR_TOKEN \
-                                
+                                    -Dsonar.projectKey=backend \
+                                    -Dsonar.login=$SONAR_TOKEN \
+                                    -Dsonar.qualitygate.wait=true
                             '''
                         }
                     }
                 }
 
+                // Timeout pour ne pas bloquer indéfiniment
                 timeout(time: 25, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+                    def qg = waitForQualityGate()
+                    if (qg.status != 'OK') {
+                        // On peut filtrer les conditions spécifiques si nécessaire
+                        echo "Quality Gate failed: ${qg.status}"
+                        notifyMail('SonarQube & Quality Gate', 'FAILED')
+                        error("SonarQube Quality Gate failed")
+                    } else {
+                        notifyMail('SonarQube & Quality Gate', 'SUCCESS')
+                    }
                 }
 
-                notifyMail('SonarQube & Quality Gate', 'SUCCESS')
             } catch (err) {
                 notifyMail('SonarQube & Quality Gate', 'FAILED')
-                error("SonarQube & Quality Gate stage failed")
+                error("SonarQube & Quality Gate stage failed: ${err}")
             }
         }
     }
 }
-
 
         /* ============================= SONARQUBE FRONTEND ================================== */
   stage('SonarQube & Quality Gate Frontend') {
