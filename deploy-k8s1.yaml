@@ -1,8 +1,9 @@
+---
 ############################################
 #          KUBERNETES DEPLOY FULLSTACK
 ############################################
-- name: Deploy Fullstack Application to Kubernetes
-  hosts: localhost
+- name: Deploy to Kubernetes
+  hosts: kubernetes
   become: true
   environment:
     KUBECONFIG: /home/ubuntu/.kube/config
