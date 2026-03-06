@@ -2,6 +2,7 @@
 ############################################
 #          KUBERNETES DEPLOY FULLSTACK
 ############################################
+
 - name: Deploy to Kubernetes
   hosts: kubernetes
   become: true
@@ -10,51 +11,68 @@
 
   tasks:
 
+    # Copy all Kubernetes manifests
+    - name: Copy manifests
+      copy:
+        src: "{{ item }}"
+        dest: /tmp/
+      loop:
+        - namespace.yaml
+        - ingress.yaml
+        - database/
+        - backend-souhir/
+        - frontend-souhir/
+
     # Namespace
     - name: Apply Namespace
-      command: kubectl apply -f namespace.yaml
-      
-     # delete deployment
-    - name: delete deployment
-      command: kubectl delete deployment --all -n my-app
+      command: kubectl apply -f /tmp/namespace.yaml
 
-    # Database
-    - name: Delete existing MySQL resources (ignore if not exists)
-      command: |
-        kubectl delete -f database/mysql-deployment.yaml --ignore-not-found=true
-        kubectl delete -f database/mysql-storage.yaml --ignore-not-found=true
-        kubectl delete -f database/mysql-secret.yaml --ignore-not-found=true
+    # Delete all deployments in namespace
+    - name: Delete all deployments
+      command: kubectl delete deployment --all -n my-app --ignore-not-found=true
+
+    # Database resources
+    - name: Delete MySQL Secret
+      command: kubectl delete -f /tmp/database/mysql-secret.yaml --ignore-not-found=true
+
+    - name: Delete MySQL Storage
+      command: kubectl delete -f /tmp/database/mysql-storage.yaml --ignore-not-found=true
+
+    - name: Delete MySQL Deployment
+      command: kubectl delete -f /tmp/database/mysql-deployment.yaml --ignore-not-found=true
 
     - name: Apply MySQL Secret
-      command: kubectl apply -f database/mysql-secret.yaml
+      command: kubectl apply -f /tmp/database/mysql-secret.yaml
 
     - name: Apply MySQL Storage
-      command: kubectl apply -f database/mysql-storage.yaml
+      command: kubectl apply -f /tmp/database/mysql-storage.yaml
 
     - name: Apply MySQL Deployment
-      command: kubectl apply -f database/mysql-deployment.yaml
+      command: kubectl apply -f /tmp/database/mysql-deployment.yaml
 
-    # Backend
-    - name: Delete existing Backend Deployment and Service
-      command: |
-        kubectl delete deployment backend-deploy --ignore-not-found=true
-        kubectl delete service backendsvc --ignore-not-found=true
+    # Backend resources
+    - name: Delete Backend Deployment
+      command: kubectl delete deployment backend-deploy --ignore-not-found=true
+
+    - name: Delete Backend Service
+      command: kubectl delete service backendsvc --ignore-not-found=true
 
     - name: Apply Backend Deployment
-      command: kubectl apply -f backend-souhir/backenddeploy.yaml
+      command: kubectl apply -f /tmp/backend-souhir/backenddeploy.yaml
 
-    # Frontend
-    - name: Delete existing Frontend Deployment and Service
-      command: |
-        kubectl delete deployment frontend-deploy --ignore-not-found=true
-        kubectl delete service frontsvc --ignore-not-found=true
+    # Frontend resources
+    - name: Delete Frontend Deployment
+      command: kubectl delete deployment frontend-deploy --ignore-not-found=true
+
+    - name: Delete Frontend Service
+      command: kubectl delete service frontsvc --ignore-not-found=true
 
     - name: Apply Frontend Deployment
-      command: kubectl apply -f frontend-souhir/frontdeploy.yaml
+      command: kubectl apply -f /tmp/frontend-souhir/frontdeploy.yaml
 
     # Ingress
-    - name: Delete existing Ingress (ignore if not exists)
-      command: kubectl delete -f ingress.yaml --ignore-not-found=true
+    - name: Delete Ingress
+      command: kubectl delete -f /tmp/ingress.yaml --ignore-not-found=true
 
     - name: Apply Ingress
-      command: kubectl apply -f ingress.yaml
+      command: kubectl apply -f /tmp/ingress.yaml
