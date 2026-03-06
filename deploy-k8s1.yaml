@@ -11,18 +11,7 @@
 
   tasks:
 
-    # Copy all Kubernetes manifests
-    - name: Copy manifests
-      copy:
-        src: "{{ item }}"
-        dest: /tmp/
-      loop:
-        - namespace.yaml
-        - ingress.yaml
-        - database/
-        - backend-souhir/
-        - frontend-souhir/
-
+  
     # Namespace
     - name: Apply Namespace
       command: kubectl apply -f /tmp/namespace.yaml
