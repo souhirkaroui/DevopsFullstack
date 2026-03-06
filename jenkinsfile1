@@ -97,15 +97,31 @@ pipeline {
                                     '''
                                 } // ← ferme withCredentials
                                 // ✅ Quality Gate DANS withSonarQubeEnv mais HORS withCredentials
-                                timeout(time: 15, unit: 'MINUTES') {
-                                    waitForQualityGate abortPipeline: true
-                                }
+                              //  timeout(time: 15, unit: 'MINUTES') {
+                               //     waitForQualityGate abortPipeline: true
+                              //  }
                             } // ← ferme withSonarQubeEnv
                         } // ← ferme dir
                         notifyMail('SonarQube Backend', 'SUCCESS')
                     } catch (err) {
                         notifyMail('SonarQube Backend', 'FAILED')
                         error("SonarQube Backend stage failed: ${err}")
+                    }
+                }
+            }
+        }
+
+stage('Quality Gate') {
+            steps {
+                script {
+                    try {
+                        timeout(time: 5, unit: 'MINUTES') {
+                            waitForQualityGate abortPipeline: true
+                        }
+                        currentBuild.description = updateStageStatus(currentBuild.description, 'Quality', 'SUCCESS')
+                    } catch (Exception e) {
+                        currentBuild.description = updateStageStatus(currentBuild.description, 'Quality', 'FAILED')
+                        throw e
                     }
                 }
             }
