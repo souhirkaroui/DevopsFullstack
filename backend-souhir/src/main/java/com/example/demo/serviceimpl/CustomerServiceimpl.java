@@ -7,11 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+
 @Service
-public class CustomerServiceimpl implements CustomerService {
+public class CustomerServiceImpl implements CustomerService {
+
+    private final CustomerRepository repository;
 
     @Autowired
-    private CustomerRepository repository;
+    public CustomerServiceImpl(CustomerRepository repository) {
+        this.repository = repository;
+    }
 
     @Override
     public List<Customer> getAllCustomers() {
@@ -19,8 +25,8 @@ public class CustomerServiceimpl implements CustomerService {
     }
 
     @Override
-    public Customer getCustomerById(Long id) {
-        return repository.findById(id).orElse(null);
+    public Optional<Customer> getCustomerById(Long id) {
+        return repository.findById(id);
     }
 
     @Override
