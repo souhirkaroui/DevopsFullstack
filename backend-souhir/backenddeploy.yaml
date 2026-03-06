@@ -46,6 +46,6 @@ spec:
   selector:
     app: backend
   ports:
-    - port: 8080  # Port interne Kubernetes
-      targetPort: 8080  # Port du container
-  type: ClusterIP        
+    - port: 8080       # Port interne Kubernetes
+      targetPort: 8080 # Port du container
+  type: ClusterIP       # reste interne, Ingress fera le routage
