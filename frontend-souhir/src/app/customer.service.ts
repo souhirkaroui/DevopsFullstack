@@ -11,25 +11,29 @@ export interface Customer {
 @Injectable({
   providedIn: 'root'
 })
-
 export class CustomerService {
 
-  private apiUrl = '/api';
+  // URL complète vers le backend via Ingress
+  private apiUrl = 'http://fullstack.ghazelatech.com/api/customers';
 
   constructor(private http: HttpClient) {}
 
+  // Récupérer tous les clients
   getCustomers(): Observable<Customer[]> {
     return this.http.get<Customer[]>(this.apiUrl);
   }
 
+  // Ajouter un nouveau client
   addCustomer(customer: Customer): Observable<Customer> {
     return this.http.post<Customer>(this.apiUrl, customer);
   }
 
+  // Mettre à jour un client existant
   updateCustomer(customer: Customer): Observable<Customer> {
     return this.http.put<Customer>(`${this.apiUrl}/${customer.id}`, customer);
   }
 
+  // Supprimer un client
   deleteCustomer(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
