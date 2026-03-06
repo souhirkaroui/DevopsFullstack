@@ -95,22 +95,23 @@ pipeline {
                                         -Dsonar.projectKey=backend \
                                         -Dsonar.login=$SONAR_TOKEN
                                     '''
-                                } // ← ferme withCredentials
-                                // ✅ Quality Gate DANS withSonarQubeEnv mais HORS withCredentials
-                              //  timeout(time: 15, unit: 'MINUTES') {
-                               //     waitForQualityGate abortPipeline: true
-                              //  }
-                            } // ← ferme withSonarQubeEnv
-                        } // ← ferme dir
-                        notifyMail('SonarQube Backend', 'SUCCESS')
+                               }
+
+                        }
+
+                        timeout(time: 25, unit: 'MINUTES') {
+                            waitForQualityGate abortPipeline: true
+                        }
+
+                        notifyMail('SonarQube & Quality Gate', 'SUCCESS')
                     } catch (err) {
-                        notifyMail('SonarQube Backend', 'FAILED')
-                        error("SonarQube Backend stage failed: ${err}")
+                        notifyMail('SonarQube & Quality Gate', 'FAILED')
+                        error("SonarQube & Quality Gate stage failed")
                     }
                 }
             }
         }
-
+}
 
         /* ============================= SONARQUBE FRONTEND ================================== */
   stage('SonarQube & Quality Gate Frontend') {
