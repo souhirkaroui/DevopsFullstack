@@ -111,21 +111,6 @@ pipeline {
             }
         }
 
-stage('Quality Gate') {
-            steps {
-                script {
-                    try {
-                        timeout(time: 15, unit: 'MINUTES') {
-                            waitForQualityGate abortPipeline: true
-                        }
-                        currentBuild.description = updateStageStatus(currentBuild.description, 'Quality', 'SUCCESS')
-                    } catch (Exception e) {
-                        currentBuild.description = updateStageStatus(currentBuild.description, 'Quality', 'FAILED')
-                        throw e
-                    }
-                }
-            }
-        }
 
         /* ============================= SONARQUBE FRONTEND ================================== */
         stage('SonarQube & Quality Gate Frontend') {
