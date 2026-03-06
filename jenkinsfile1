@@ -83,34 +83,34 @@ pipeline {
         }
 
         /* ============================= SONARQUBE BACKEND ================================== */
-        stage('SonarQube & Quality Gate Backend') {
-            steps {
-                script {
-                    try {
-                        dir('backend-souhir') {
-                            withSonarQubeEnv('SonarQube') {
-                                withCredentials([string(credentialsId: 'sonarback', variable: 'SONAR_TOKEN')]) {
-                                    sh '''
-                                        mvn clean package -DskipTests sonar:sonar \
-                                        -Dsonar.projectKey=backend \
-                                        -Dsonar.login=$SONAR_TOKEN
-                                    '''
-                               }
-
+       stage('SonarQube & Quality Gate Backend') {
+    steps {
+        script {
+            try {
+                dir('backend-souhir') {
+                    withSonarQubeEnv('SonarQube') {
+                        withCredentials([string(credentialsId: 'sonarback', variable: 'SONAR_TOKEN')]) {
+                            sh '''
+                                mvn clean package -DskipTests sonar:sonar \
+                                -Dsonar.projectKey=backend \
+                                -Dsonar.login=$SONAR_TOKEN
+                            '''
                         }
-
-                        timeout(time: 25, unit: 'MINUTES') {
-                            waitForQualityGate abortPipeline: true
-                        }
-
-                        notifyMail('SonarQube & Quality Gate', 'SUCCESS')
-                    } catch (err) {
-                        notifyMail('SonarQube & Quality Gate', 'FAILED')
-                        error("SonarQube & Quality Gate stage failed")
                     }
                 }
+
+                timeout(time: 25, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+
+                notifyMail('SonarQube & Quality Gate', 'SUCCESS')
+            } catch (err) {
+                notifyMail('SonarQube & Quality Gate', 'FAILED')
+                error("SonarQube & Quality Gate stage failed")
             }
         }
+    }
+}
 
 
         /* ============================= SONARQUBE FRONTEND ================================== */
