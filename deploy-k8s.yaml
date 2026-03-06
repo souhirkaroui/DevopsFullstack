@@ -3,7 +3,7 @@
 ############################################
 
 - name: Deploy Fullstack Application to Kubernetes
-  hosts: kubernete
+  hosts: kubernetes
   become: true
 
   environment:
