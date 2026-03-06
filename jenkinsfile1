@@ -91,35 +91,27 @@ pipeline {
                     withSonarQubeEnv('SonarQube') {
                         withCredentials([string(credentialsId: 'sonarback', variable: 'SONAR_TOKEN')]) {
                             sh '''
-                                mvn clean package -DskipTests sonar:sonar \
-                                    -Dsonar.projectKey=backend \
-                                    -Dsonar.login=$SONAR_TOKEN \
-                                    -Dsonar.qualitygate.wait=true
+                                mvn clean package -DskipTests=true
+                                mvn sonar:sonar \
+                                -Dsonar.projectKey=backend \
+                                -Dsonar.login=$SONAR_TOKEN
                             '''
+                        }
+                        // ✅ waitForQualityGate DANS withSonarQubeEnv
+                        timeout(time: 15, unit: 'MINUTES') {
+                            waitForQualityGate abortPipeline: true
                         }
                     }
                 }
-
-                // Timeout pour ne pas bloquer indéfiniment
-                timeout(time: 25, unit: 'MINUTES') {
-                    def qg = waitForQualityGate()
-                    if (qg.status != 'OK') {
-                        // On peut filtrer les conditions spécifiques si nécessaire
-                        echo "Quality Gate failed: ${qg.status}"
-                        notifyMail('SonarQube & Quality Gate', 'FAILED')
-                        error("SonarQube Quality Gate failed")
-                    } else {
-                        notifyMail('SonarQube & Quality Gate', 'SUCCESS')
-                    }
-                }
-
+                notifyMail('SonarQube Backend', 'SUCCESS')
             } catch (err) {
-                notifyMail('SonarQube & Quality Gate', 'FAILED')
-                error("SonarQube & Quality Gate stage failed: ${err}")
+                notifyMail('SonarQube Backend', 'FAILED')
+                error("SonarQube Backend stage failed")
             }
         }
     }
 }
+
 
         /* ============================= SONARQUBE FRONTEND ================================== */
   stage('SonarQube & Quality Gate Frontend') {
