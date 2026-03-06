@@ -113,44 +113,43 @@ pipeline {
 
 
         /* ============================= SONARQUBE FRONTEND ================================== */
-       stage('SonarQube & Quality Gate Frontend') {
-    steps {
+  stage('SonarQube & Quality Gate Frontend') {
+       steps {
         script {
-            try {
-                dir('frontend-souhir') {
-                    withSonarQubeEnv('SonarQube') {
-                        def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                        withCredentials([string(credentialsId: 'sonarfront', variable: 'SONAR_TOKEN')]) {
-                            sh """
-                                ${scannerHome}/bin/sonar-scanner \
-                                -Dsonar.projectKey=front \
-                                -Dsonar.projectName=front \
-                                -Dsonar.sources=. \
-                                -Dsonar.host.url=http://172.31.15.219:9000 \
-                                -Dsonar.login=$SONAR_TOKEN
-                            """
-                        } // fin withCredentials
-                    } // fin withSonarQubeEnv
-
-                    // ✅ Attente et vérification Quality Gate
-                    timeout(time: 15, unit: 'MINUTES') {
-                        def qg = waitForQualityGate()
-                        echo "Status de la Quality Gate Frontend: ${qg.status}"
-                        if (qg.status != 'OK') {
-                            error "La Quality Gate Frontend a échoué : ${qg.status}"
-                        }
+            dir('frontend-souhir') {
+                withSonarQubeEnv('SonarQube') {
+                    def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                    withCredentials([string(credentialsId: 'sonarfront', variable: 'SONAR_TOKEN')]) {
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=front \
+                            -Dsonar.projectName=front \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=http://172.31.15.219:9000 \
+                            -Dsonar.login=$SONAR_TOKEN
+                        """
                     }
-                } // fin dir
+                }
 
-                notifyMail('Sonar Frontend', 'SUCCESS')
-            } catch (err) {
-                notifyMail('Sonar Frontend', 'FAILED')
-                error("SonarQube Frontend stage failed: ${err}")
+                // ✅ Vérification rapide de la Quality Gate
+                def qg = null
+                timeout(time: 5, unit: 'MINUTES') {  // max 5 minutes pour récupérer le résultat
+                    waitUntil {
+                        qg = waitForQualityGate()
+                        echo "Current Quality Gate Status: ${qg.status}"
+                        return qg.status != 'PENDING'  // boucle tant que SonarQube n’a pas renvoyé OK/FAILED
+                    }
+                }
+
+                if (qg.status != 'OK') {
+                    error "La Quality Gate Frontend a échoué : ${qg.status}"
+                } else {
+                    echo "Quality Gate Frontend OK ✅"
+                }
             }
         }
     }
 }
-
 
         /* =========================== UPLOAD NEXUS BACKEND ====================== */
         stage('Upload to Nexus Backend') {
