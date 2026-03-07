@@ -13,7 +13,7 @@ spec:
         paths:
           # Backend: tout ce qui commence par /api va vers backend
           - path: /api/.*
-            pathType: ImplementationSpecific
+            pathType: Prefix                       
             backend:
               service:
                 name: backendsvc
@@ -22,7 +22,7 @@ spec:
 
           # Frontend: tout le reste va vers frontsvc
           - path: /.*
-            pathType: ImplementationSpecific
+            pathType: Prefix
             backend:
               service:
                 name: frontsvc
