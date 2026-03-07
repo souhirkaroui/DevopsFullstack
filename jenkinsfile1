@@ -232,7 +232,7 @@ stage('Build & Test Backend') {
                 sh """
                    cd /var/lib/jenkins/workspace/projet-fullstack
                    . /var/lib/jenkins/ansible-venv/bin/activate
-                   ansible-playbook -i inventory.yaml deploy-k8s.yaml -e image_tag=${BUILD_NUMBER}
+                   ansible-playbook -i inventory.yaml deploy-k8s1.yaml -e image_tag=${BUILD_NUMBER}
                 """
                 notifyMail('Deploy to Kubernetes', 'SUCCESS')
             } catch (err) {
