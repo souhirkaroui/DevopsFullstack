@@ -1,6 +1,9 @@
 pipeline {
     agent any
-
+    options {
+        timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
     environment {
         SONARQUBE_SERVER = 'SonarQube'
         EMAIL_TO = 'souhir.karoui.ks@gmail.com'
