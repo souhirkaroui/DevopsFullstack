@@ -10,35 +10,31 @@ pipeline {
         KUBECONFIG = "/home/ubuntu/.kube/config"
     }
 
- stages {
+    stages {
 
-       /* ====================== BUILD & TEST BACKEND ======================= */
-  stage('Build & Test Backend') {
-    steps {
-        script {
-            try {
-                dir('backend-souhir') {
-                    // Build
-                    sh 'mvn clean package -DskipTests=true'
-                    notifyMail('Build Backend', 'SUCCESS')
-
-                    // Test
-                    sh 'mvn test package -DskipTests=true'
-                    notifyMail('Test Backend', 'SUCCESS')
-                }
-            } catch (err) {
-                // On détecte si l'erreur est sur le build ou le test
-                if (err.toString().contains('BUILD FAILURE')) {
-                    notifyMail('Build Backend', 'FAILED')
-                    error("Build Backend failed")
-                } else {
-                    notifyMail('Test Backend', 'FAILED')
-                    error("Test Backend failed")
+        /* ====================== BUILD & TEST BACKEND ======================= */
+        stage('Build & Test Backend') {
+            steps {
+                script {
+                    try {
+                        dir('backend-souhir') {
+                            sh 'mvn clean package -DskipTests=true'
+                            notifyMail('Build Backend', 'SUCCESS')
+                            sh 'mvn test package -DskipTests=true'
+                            notifyMail('Test Backend', 'SUCCESS')
+                        }
+                    } catch (err) {
+                        if (err.toString().contains('BUILD FAILURE')) {
+                            notifyMail('Build Backend', 'FAILED')
+                            error("Build Backend failed")
+                        } else {
+                            notifyMail('Test Backend', 'FAILED')
+                            error("Test Backend failed")
+                        }
+                    }
                 }
             }
         }
-    }
-}
 
         /* =========================== BUILD FRONTEND ============================ */
         stage('Build Frontend') {
@@ -76,73 +72,59 @@ pipeline {
         }
 
         /* ============================= SONARQUBE BACKEND ================================== */
-       stage('SonarQube & Quality Gate Backend') {
-    steps {
-        script {
-            try {
-                dir('backend-souhir') {
-                    withSonarQubeEnv('SonarQube') {
-                        withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
-                            sh '''
-                                mvn clean package -DskipTests=true
-                                mvn sonar:sonar \
-                                -Dsonar.projectKey=backend \
-                                -Dsonar.login=$SONAR_TOKEN
-                            '''
+        stage('SonarQube & Quality Gate Backend') {
+            steps {
+                script {
+                    try {
+                        dir('backend-souhir') {
+                            withSonarQubeEnv('SonarQube') {
+                                withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
+                                    sh '''
+                                        mvn clean package -DskipTests=true
+                                        mvn sonar:sonar \
+                                        -Dsonar.projectKey=backend \
+                                        -Dsonar.login=$SONAR_TOKEN
+                                    '''
+                                }
+                            }
                         }
-                        // ✅ waitForQualityGate DANS withSonarQubeEnv
-                      //  timeout(time: 15, unit: 'MINUTES') {
-                     //       waitForQualityGate abortPipeline: true
-                     //   }
+                        notifyMail('SonarQube Backend', 'SUCCESS')
+                    } catch (err) {
+                        notifyMail('SonarQube Backend', 'FAILED')
+                        error("SonarQube Backend stage failed")
                     }
                 }
-                notifyMail('SonarQube Backend', 'SUCCESS')
-            } catch (err) {
-                notifyMail('SonarQube Backend', 'FAILED')
-                error("SonarQube Backend stage failed")
             }
         }
-    }
-}
-
 
         /* ============================= SONARQUBE FRONTEND ================================== */
-  stage('SonarQube & Quality Gate Frontend') {
-    steps {
-        script {
-            try {
-                dir('frontend-souhir') {
-
-                    withSonarQubeEnv('SonarQube') {
-
-                        def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-
-                        withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
-
-                            sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=front \
-                            -Dsonar.projectName=front \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=http://172.31.15.219:9000 \
-                            -Dsonar.login=$SONAR_TOKEN
-                            """
-
+        stage('SonarQube & Quality Gate Frontend') {
+            steps {
+                script {
+                    try {
+                        dir('frontend-souhir') {
+                            withSonarQubeEnv('SonarQube') {
+                                def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                                withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
+                                    sh """
+                                    ${scannerHome}/bin/sonar-scanner \
+                                    -Dsonar.projectKey=front \
+                                    -Dsonar.projectName=front \
+                                    -Dsonar.sources=. \
+                                    -Dsonar.host.url=http://172.31.15.219:9000 \
+                                    -Dsonar.login=$SONAR_TOKEN
+                                    """
+                                }
+                            }
                         }
+                        notifyMail('SonarQube Frontend', 'SUCCESS')
+                    } catch (err) {
+                        notifyMail('SonarQube Frontend', 'FAILED')
+                        error("SonarQube Frontend stage failed")
                     }
                 }
-
-                notifyMail('SonarQube Frontend', 'SUCCESS')
-
-            } catch (err) {
-
-                notifyMail('SonarQube Frontend', 'FAILED')
-                error("SonarQube Frontend stage failed")
-
             }
         }
-    }
-}
 
         /* =========================== UPLOAD NEXUS BACKEND ====================== */
         stage('Upload to Nexus Backend') {
@@ -224,28 +206,24 @@ pipeline {
         }
 
         /* ======================= DEPLOY KUBERNETES via Ansible ================= */
-       stage('Deploy to Kubernetes') {
-       steps {
-        script {
-            try {
-
-                sh """
-                source /var/lib/jenkins/ansible-venv/bin/activate
-                ansible-playbook -i inventory.yaml deploymyapp.yaml -e image_tag=${BUILD_NUMBER}
-                """
-
-                notifyMail('Deploy to Kubernetes', 'SUCCESS')
-
-            } catch (err) {
-
-                notifyMail('Deploy to Kubernetes', 'FAILED')
-                error("Kubernetes deployment failed: ${err}")
-
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    try {
+                        sh """
+                        source /var/lib/jenkins/ansible-venv/bin/activate
+                        ansible-playbook -i inventory.yaml deploymyapp.yaml -e image_tag=${BUILD_NUMBER}
+                        """
+                        notifyMail('Deploy to Kubernetes', 'SUCCESS')
+                    } catch (err) {
+                        notifyMail('Deploy to Kubernetes', 'FAILED')
+                        error("Kubernetes deployment failed: ${err}")
+                    }
+                }
             }
         }
-    }
-}
 
+    } // ✅ fin du bloc stages
 
     /* ======================== POST PIPELINE ============================== */
     post {
@@ -257,6 +235,7 @@ pipeline {
         }
     }
 
+} // ✅ fin du pipeline
 
 /* ================= PREMIUM EMAIL FUNCTION ================= */
 def notifyMail(stageName, status) {
@@ -313,5 +292,5 @@ ${statusIcon}
 </body>
 </html>
 """
-    )
+)
 }
