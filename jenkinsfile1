@@ -226,18 +226,22 @@ stage('Build & Test Backend') {
 
         /* ======================= DEPLOY KUBERNETES via Ansible ================= */
        stage('Deploy to Kubernetes') {
-    steps {
+       steps {
         script {
             try {
+
                 sh """
-                    source /var/lib/jenkins/ansible-venv/bin/activate
-                    ansible-playbook -i inventory.yaml deploymyapp.yaml \
-                    -e image_tag=${BUILD_NUMBER}
+                source /var/lib/jenkins/ansible-venv/bin/activate
+                ansible-playbook -i inventory.yaml deploymyapp.yaml -e image_tag=${BUILD_NUMBER}
                 """
+
                 notifyMail('Deploy to Kubernetes', 'SUCCESS')
+
             } catch (err) {
+
                 notifyMail('Deploy to Kubernetes', 'FAILED')
-                error("Kubernetes deployment failed")
+                error("Kubernetes deployment failed: ${err}")
+
             }
         }
     }
