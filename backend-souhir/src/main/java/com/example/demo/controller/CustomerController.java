@@ -13,14 +13,14 @@ import java.util.List;
 
 // -------------------- CORS Configuration --------------------
 @Configuration
-public class WebConfig {
+class WebConfig {   // <-- enlever "public"
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/api/**") // tous les endpoints sous /api
+                registry.addMapping("/api/**")
                         .allowedOrigins("http://fullstack.ghazelatech.com")
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*");
