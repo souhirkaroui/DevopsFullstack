@@ -9,12 +9,6 @@
   tasks:
 
   # ===============================
-  # Namespace
-  # ===============================
-  - name: Create namespace
-    command: kubectl apply -f namespace.yaml
-
-  # ===============================
   # Database - MySQL
   # ===============================
   - name: Deploy MySQL Secret
