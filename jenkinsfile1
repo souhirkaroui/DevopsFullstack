@@ -4,6 +4,7 @@ pipeline {
     environment {
         SONARQUBE_SERVER = 'SonarQube'
         EMAIL_TO = 'souhir.karoui.ks@gmail.com'
+        KUBECONFIG = "/home/ubuntu/.kube/config"
     }
 
     stages {
