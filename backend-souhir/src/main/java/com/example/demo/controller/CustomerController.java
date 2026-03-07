@@ -21,7 +21,7 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/api/**") // tous les endpoints sous /api
-                        .allowedOrigins("http://fullstack.ghazelatech.com", "https://fullstack.ghazelatech.com")
+                        .allowedOrigins("http://fullstack.ghazelatech.com")
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*");
             }
