@@ -3,28 +3,25 @@ kind: Ingress
 metadata:
   name: myingress
   namespace: my-app
-  annotations:
-    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   rules:
-    - host: fullstack.ghazelatech.com
-      http:
-        paths:
-          # Backend: tout ce qui commence par /api va vers backend
-          - path: /api
-            pathType: Prefix                       
-            backend:
-              service:
-                name: backendsvc
-                port:
-                  number: 8080
+  - host: fullstack.ghazelatech.com
+    http:
+      paths:
 
-          # Frontend: tout le reste va vers frontsvc
-          - path: /.*
-            pathType: Prefix
-            backend:
-              service:
-                name: frontsvc
-                port:
-                  number: 80
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: backendsvc
+            port:
+              number: 8080
+
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontsvc
+            port:
+              number: 80
