@@ -230,7 +230,7 @@ stage('Build & Test Backend') {
                 script {
                     try {
                         sh """
-                           . /var/lib/jenkins/ansible-venv/bin/activate
+                           . /var/lib/jenkins/workspace/projet-fullstack
                            ansible-playbook -i inventory.yaml deploy-k8s.yaml \
                             -e image_tag=${BUILD_NUMBER}
                         """
