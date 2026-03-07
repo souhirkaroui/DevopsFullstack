@@ -17,18 +17,58 @@
   tasks:
 
     # ============ NAMESPACE ============
+    - name: Check if namespace.yaml exists
+      stat:
+        path: "{{ namespace_file }}"
+      register: namespace_stat
+
+    - name: Fail if namespace.yaml is missing
+      fail:
+        msg: "namespace.yaml not found!"
+      when: not namespace_stat.stat.exists
+
     - name: Apply Namespace
       command: kubectl apply -f {{ namespace_file }}
 
     # ============ STORAGE (PV + PVC) ============
+    - name: Check MySQL storage file
+      stat:
+        path: "{{ db_path }}/mysql-storage.yaml"
+      register: mysql_storage_stat
+
+    - name: Fail if MySQL storage file missing
+      fail:
+        msg: "mysql-storage.yaml not found!"
+      when: not mysql_storage_stat.stat.exists
+
     - name: Apply MySQL Storage
       command: kubectl apply -f {{ db_path }}/mysql-storage.yaml
 
     # ============ SECRET ============
+    - name: Check MySQL secret file
+      stat:
+        path: "{{ db_path }}/mysql-secret.yaml"
+      register: mysql_secret_stat
+
+    - name: Fail if MySQL secret file missing
+      fail:
+        msg: "mysql-secret.yaml not found!"
+      when: not mysql_secret_stat.stat.exists
+
     - name: Apply MySQL Secret
       command: kubectl apply -f {{ db_path }}/mysql-secret.yaml
 
     # ============ MYSQL ============
+    - name: Check MySQL deployment file
+      stat:
+        path: "{{ db_path }}/mysql-deployment.yaml"
+      register: mysql_deploy_stat
+
+    - name: Fail if MySQL deployment file missing
+      fail:
+        msg: "mysql-deployment.yaml not found!"
+      when: not mysql_deploy_stat.stat.exists
+
     - name: Apply MySQL Deployment
       command: kubectl apply -f {{ db_path }}/mysql-deployment.yaml
 
@@ -40,6 +80,16 @@
       until: mysql_status.rc == 0
 
     # ============ BACKEND ============
+    - name: Check Backend deployment file
+      stat:
+        path: "{{ backend_path }}/backenddeploy.yaml"
+      register: backend_stat
+
+    - name: Fail if Backend deployment file missing
+      fail:
+        msg: "backenddeploy.yaml not found!"
+      when: not backend_stat.stat.exists
+
     - name: Delete Backend Deployment (force recreate)
       command: kubectl delete deployment backend -n my-app --ignore-not-found=true
 
@@ -54,6 +104,16 @@
       until: backend_status.rc == 0
 
     # ============ FRONTEND ============
+    - name: Check Frontend deployment file
+      stat:
+        path: "{{ frontend_path }}/frontdeploy.yaml"
+      register: frontend_stat
+
+    - name: Fail if Frontend deployment file missing
+      fail:
+        msg: "frontdeploy.yaml not found!"
+      when: not frontend_stat.stat.exists
+
     - name: Delete Frontend Deployment (force recreate)
       command: kubectl delete deployment frontend -n my-app --ignore-not-found=true
 
@@ -64,6 +124,16 @@
       command: kubectl rollout status deployment/frontend -n my-app --timeout=60s
 
     # ============ INGRESS ============
+    - name: Check Ingress file
+      stat:
+        path: "{{ ingress_file }}"
+      register: ingress_stat
+
+    - name: Fail if Ingress file missing
+      fail:
+        msg: "ingress.yaml not found!"
+      when: not ingress_stat.stat.exists
+
     - name: Apply Ingress
       command: kubectl apply -f {{ ingress_file }}
 
