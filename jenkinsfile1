@@ -226,23 +226,22 @@ stage('Build & Test Backend') {
 
         /* ======================= DEPLOY KUBERNETES via Ansible ================= */
         stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    try {
-                        sh """
-                           . /var/lib/jenkins/workspace/projet-fullstack
-                           ansible-playbook -i inventory.yaml deploy-k8s.yaml \
-                            -e image_tag=${BUILD_NUMBER}
-                        """
-                        notifyMail('Deploy to Kubernetes', 'SUCCESS')
-                    } catch (err) {
-                        notifyMail('Deploy to Kubernetes', 'FAILED')
-                        error("Kubernetes deployment failed")
-                    }
-                }
+    steps {
+        script {
+            try {
+                sh """
+                   cd /var/lib/jenkins/workspace/projet-fullstack
+                   . /var/lib/jenkins/ansible-venv/bin/activate
+                   ansible-playbook -i inventory.yaml deploy-k8s.yaml -e image_tag=${BUILD_NUMBER}
+                """
+                notifyMail('Deploy to Kubernetes', 'SUCCESS')
+            } catch (err) {
+                notifyMail('Deploy to Kubernetes', 'FAILED')
+                error("Kubernetes deployment failed")
             }
         }
     }
+}
 
     /* ======================== POST PIPELINE ============================== */
     post {
