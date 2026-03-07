@@ -1,0 +1,54 @@
+---
+- name: Deploy Fullstack Application to Kubernetes
+  hosts: kubernetes
+  become: true
+
+  environment:
+    KUBECONFIG: /home/ubuntu/.kube/config
+
+  tasks:
+
+  # ===============================
+  # Namespace
+  # ===============================
+  - name: Create namespace
+    command: kubectl apply -f namespace.yaml
+
+  # ===============================
+  # Database - MySQL
+  # ===============================
+  - name: Deploy MySQL Secret
+    command: kubectl apply -f database/mysql-secret.yaml
+
+  - name: Deploy MySQL Storage
+    command: kubectl apply -f database/mysql-storage.yaml
+
+  - name: Deploy MySQL Deployment
+    command: kubectl apply -f database/mysql-deployment.yaml
+
+  - name: Wait for MySQL to be Ready
+    command: kubectl rollout status deployment/mysql --timeout=120s -n my-app
+
+  # ===============================
+  # Backend
+  # ===============================
+  - name: Deploy Backend
+    command: kubectl apply -f backend-souhir/backenddeploy.yaml
+
+  - name: Wait for Backend to be Ready
+    command: kubectl rollout status deployment/backend-deployment --timeout=120s -n my-app
+
+  # ===============================
+  # Frontend
+  # ===============================
+  - name: Deploy Frontend
+    command: kubectl apply -f frontend-souhir/frontdeploy.yaml
+
+  - name: Wait for Frontend to be Ready
+    command: kubectl rollout status deployment/frontend-deployment --timeout=120s -n my-app
+
+  # ===============================
+  # Ingress
+  # ===============================
+  - name: Deploy Ingress
+    command: kubectl apply -f ingress.yaml
