@@ -7,23 +7,30 @@
   become: true
   environment:
     KUBECONFIG: /home/ubuntu/.kube/config
+  vars:
+    namespace_file: "{{ playbook_dir }}/namespace.yaml"
+    ingress_file: "{{ playbook_dir }}/ingress.yaml"
+    db_path: "{{ playbook_dir }}/database"
+    backend_path: "{{ playbook_dir }}/backend-souhir"
+    frontend_path: "{{ playbook_dir }}/frontend-souhir"
+
   tasks:
 
     # ============ NAMESPACE ============
     - name: Apply Namespace
-      command: kubectl apply -f namespace.yaml
+      command: kubectl apply -f {{ namespace_file }}
 
-    # ============ STORAGE (une seule fois) ============
-    - name: Apply MySQL Storage (PV + PVC)
-      command: kubectl apply -f database/mysql-storage.yaml
+    # ============ STORAGE (PV + PVC) ============
+    - name: Apply MySQL Storage
+      command: kubectl apply -f {{ db_path }}/mysql-storage.yaml
 
     # ============ SECRET ============
     - name: Apply MySQL Secret
-      command: kubectl apply -f database/mysql-secret.yaml
+      command: kubectl apply -f {{ db_path }}/mysql-secret.yaml
 
     # ============ MYSQL ============
     - name: Apply MySQL Deployment
-      command: kubectl apply -f database/mysql-deployment.yaml
+      command: kubectl apply -f {{ db_path }}/mysql-deployment.yaml
 
     - name: Wait for MySQL to be ready
       command: kubectl rollout status deployment/mysql -n my-app --timeout=120s
@@ -32,16 +39,12 @@
       delay: 10
       until: mysql_status.rc == 0
 
-    - name: Extra wait for MySQL to initialize
-      pause:
-        seconds: 20
-
     # ============ BACKEND ============
     - name: Delete Backend Deployment (force recreate)
       command: kubectl delete deployment backend -n my-app --ignore-not-found=true
 
     - name: Apply Backend Deployment
-      command: kubectl apply -f backend-souhir/backenddeploy.yaml
+      command: kubectl apply -f {{ backend_path }}/backenddeploy.yaml
 
     - name: Wait for Backend to be ready
       command: kubectl rollout status deployment/backend -n my-app --timeout=120s
@@ -55,14 +58,14 @@
       command: kubectl delete deployment frontend -n my-app --ignore-not-found=true
 
     - name: Apply Frontend Deployment
-      command: kubectl apply -f /tmp/frontend-souhir/frontdeploy.yaml
+      command: kubectl apply -f {{ frontend_path }}/frontdeploy.yaml
 
     - name: Wait for Frontend to be ready
       command: kubectl rollout status deployment/frontend -n my-app --timeout=60s
 
     # ============ INGRESS ============
     - name: Apply Ingress
-      command: kubectl apply -f ingress.yaml
+      command: kubectl apply -f {{ ingress_file }}
 
     # ============ VERIFICATION FINALE ============
     - name: Show all pods status
