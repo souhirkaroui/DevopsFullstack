@@ -10,10 +10,10 @@ pipeline {
         KUBECONFIG = "/home/ubuntu/.kube/config"
     }
 
-    stages {
+ stages {
 
        /* ====================== BUILD & TEST BACKEND ======================= */
-stage('Build & Test Backend') {
+  stage('Build & Test Backend') {
     steps {
         script {
             try {
@@ -246,6 +246,7 @@ stage('Build & Test Backend') {
     }
 }
 
+
     /* ======================== POST PIPELINE ============================== */
     post {
         success {
@@ -255,7 +256,7 @@ stage('Build & Test Backend') {
             notifyMail('PIPELINE GLOBAL', 'FAILED')
         }
     }
-}
+
 
 /* ================= PREMIUM EMAIL FUNCTION ================= */
 def notifyMail(stageName, status) {
