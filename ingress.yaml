@@ -12,7 +12,7 @@ spec:
       http:
         paths:
           # Backend: tout ce qui commence par /api va vers backend
-          - path: /api/.*
+          - path: /api
             pathType: Prefix                       
             backend:
               service:
