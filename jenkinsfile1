@@ -108,38 +108,37 @@ stage('Build & Test Backend') {
 
         /* ============================= SONARQUBE FRONTEND ================================== */
   stage('SonarQube & Quality Gate Frontend') {
-       steps {
+    steps {
         script {
-            dir('frontend-souhir') {
-                withSonarQubeEnv('SonarQube') {
-                    def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                    withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
-                        sh """
+            try {
+                dir('frontend-souhir') {
+
+                    withSonarQubeEnv('SonarQube') {
+
+                        def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+
+                        withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
+
+                            sh """
                             ${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=front \
                             -Dsonar.projectName=front \
                             -Dsonar.sources=. \
                             -Dsonar.host.url=http://172.31.15.219:9000 \
                             -Dsonar.login=$SONAR_TOKEN
-                        """
+                            """
+
+                        }
                     }
                 }
 
-                // ✅ Vérification rapide de la Quality Gate
-               // def qg = null
-             //   timeout(time: 5, unit: 'MINUTES') {  // max 5 minutes pour récupérer le résultat
-             //      waitUntil {
-             //           qg = waitForQualityGate()
-            //            echo "Current Quality Gate Status: ${qg.status}"
-            //            return qg.status != 'PENDING'  // boucle tant que SonarQube n’a pas renvoyé OK/FAILED
-                 //   }
-            //    }
+                notifyMail('SonarQube Frontend', 'SUCCESS')
 
-              //  if (qg.status != 'OK') {
-           //         error "La Quality Gate Frontend a échoué : ${qg.status}"
-            //    } else {
-            //        echo "Quality Gate Frontend OK ✅"
-           //     }
+            } catch (err) {
+
+                notifyMail('SonarQube Frontend', 'FAILED')
+                error("SonarQube Frontend stage failed")
+
             }
         }
     }
