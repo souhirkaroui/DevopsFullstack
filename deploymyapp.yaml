@@ -1,6 +1,6 @@
 ---
 - name: Deploy Fullstack Application to Kubernetes
-  hosts: kubernetes
+  hosts: localhost
   become: true
 
   environment:
