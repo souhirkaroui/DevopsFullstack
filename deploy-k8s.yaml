@@ -117,10 +117,9 @@
     # Backend Service (Prometheus scrape)
     ###################################
     - name: Apply Backend Service
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kubeconfig_path }}"
-        state: present
-        src: "{{ backend_path }}/serviceback.yaml"
+      command: kubectl apply -f {{ workspace }}/serviceback.yaml
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
 
     ###################################
     # Frontend (image_tag dynamique)
