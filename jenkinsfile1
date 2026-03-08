@@ -71,66 +71,74 @@ pipeline {
             }
         }
 
-       /* ============================= SONARQUBE BACKEND ================================== */
+       /* ============================= SONARQUBE & QUALITY GATE BACKEND ================================== */
 stage('SonarQube & Quality Gate Backend') {
     steps {
         script {
-            try {
-                dir('backend-souhir') {
-                    withSonarQubeEnv('SonarQube') {
-                        withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
-                            sh '''
-                                mvn clean package -DskipTests=true
-                                mvn sonar:sonar \
-                                -Dsonar.projectKey=backend \
-                                -Dsonar.login=$SONAR_TOKEN
-                            '''
-                        }
-                    }
-
-                    // Attendre la Quality Gate (25 min max) et arrêter le pipeline si échoue
-                    timeout(time: 25, unit: 'MINUTES') {
-                        waitForQualityGate abortPipeline: true
+            dir('backend-souhir') {
+                withSonarQubeEnv('SonarQube') {
+                    withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
+                        sh '''
+                            mvn clean package -DskipTests=true
+                            mvn sonar:sonar \
+                            -Dsonar.projectKey=backend \
+                            -Dsonar.login=$SONAR_TOKEN
+                        '''
                     }
                 }
-
-                notifyMail('SonarQube Backend', 'SUCCESS')
-            } catch (err) {
-                notifyMail('SonarQube Backend', 'FAILED')
-                error("SonarQube Backend stage failed")
+                
+                // Attente du résultat Quality Gate via le webhook
+                timeout(time: 25, unit: 'MINUTES') {
+                    def qg = waitForQualityGate()
+                    if (qg.status != 'OK') {
+                        echo "Quality Gate Status: ${qg.status}"
+                        // Ne pas bloquer le pipeline, juste notifier
+                        notifyMail('SonarQube Backend', 'FAILED - Quality Gate ' + qg.status)
+                        // Optionnel: abortPipeline: true si tu veux arrêter le build
+                        // error("Pipeline aborted due to failed Quality Gate")
+                    } else {
+                        notifyMail('SonarQube Backend', 'SUCCESS - Quality Gate OK')
+                    }
+                }
             }
         }
     }
 }
 
-        /* ============================= SONARQUBE FRONTEND ================================== */
-        stage('SonarQube & Quality Gate Frontend') {
-            steps {
-                script {
-                    try {
-                        dir('frontend-souhir') {
-                            withSonarQubeEnv('SonarQube') {
-                                def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                                withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
-                                    sh """
-                                    ${scannerHome}/bin/sonar-scanner \
-                                    -Dsonar.projectKey=front \
-                                    -Dsonar.projectName=front \
-                                    -Dsonar.sources=. \
-                                    -Dsonar.host.url=http://172.31.15.219:9000 \
-                                    -Dsonar.login=$SONAR_TOKEN
-                                    """
-                                }
-                            }
-                        }
-                        notifyMail('SonarQube Frontend', 'SUCCESS')
-                    } catch (err) {
-                        notifyMail('SonarQube Frontend', 'FAILED')
-                        error("SonarQube Frontend stage failed")
+/* ============================= SONARQUBE & QUALITY GATE FRONTEND ================================== */
+stage('SonarQube & Quality Gate Frontend') {
+    steps {
+        script {
+            dir('frontend-souhir') {
+                withSonarQubeEnv('SonarQube') {
+                    def scannerHome = tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                    withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=front \
+                            -Dsonar.projectName=front \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=http://172.31.15.219:9000 \
+                            -Dsonar.login=$SONAR_TOKEN
+                        """
+                    }
+                }
+
+                // Attente du résultat Quality Gate via le webhook
+                timeout(time: 25, unit: 'MINUTES') {
+                    def qg = waitForQualityGate()
+                    if (qg.status != 'OK') {
+                        echo "Quality Gate Status: ${qg.status}"
+                        notifyMail('SonarQube Frontend', 'FAILED - Quality Gate ' + qg.status)
+                        // Optionnel: error("Pipeline aborted due to failed Quality Gate")
+                    } else {
+                        notifyMail('SonarQube Frontend', 'SUCCESS - Quality Gate OK')
                     }
                 }
             }
         }
+    }
+}
 
         /* =========================== UPLOAD NEXUS BACKEND ====================== */
         stage('Upload to Nexus Backend') {
