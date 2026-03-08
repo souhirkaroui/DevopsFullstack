@@ -1,15 +1,35 @@
 ---
 ############################################
-# Deploy Fullstack Application to Kubernetes
+# STEP 1 - Copy files from Jenkins to Master
+############################################
+- name: Copy files to MasterNode
+  hosts: kubernetes
+  become: true
+  tasks:
+    - name: Create workspace directory on MasterNode
+      file:
+        path: /tmp/projet-fullstack
+        state: directory
+        mode: '0755'
+
+    - name: Copy all project files to MasterNode
+      synchronize:
+        src: /var/lib/jenkins/workspace/projet-fullstack/
+        dest: /tmp/projet-fullstack/
+        recursive: yes
+        delete: yes
+
+############################################
+# STEP 2 - Deploy to Kubernetes
 ############################################
 - name: Deploy Fullstack Application to Kubernetes
   hosts: kubernetes
   become: true
   environment:
-    KUBECONFIG: /var/lib/jenkins/.kube/config
+    KUBECONFIG: /home/ubuntu/.kube/config
   vars:
-    kubeconfig_path: "/var/lib/jenkins/.kube/config"
-    workspace: "/var/lib/jenkins/workspace/projet-fullstack"
+    kubeconfig_path: "/home/ubuntu/.kube/config"
+    workspace: "/tmp/projet-fullstack"
     db_path: "{{ workspace }}/database"
     backend_path: "{{ workspace }}/backend-souhir"
     frontend_path: "{{ workspace }}/frontend-souhir"
