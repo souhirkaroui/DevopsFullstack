@@ -1,23 +1,18 @@
+---
 ############################################
 # Deploy Fullstack Application to Kubernetes
 ############################################
-
 - name: Deploy Fullstack Application to Kubernetes
   hosts: kubernetes
   become: true
-
+  environment:
+    KUBECONFIG: /var/lib/jenkins/.kube/config
   vars:
-    # Chemin fixe vers le kubeconfig lisible par Jenkins
-    kubeconfig_path: /home/ubuntu/.kube/config
-
-    # Fichiers et chemins relatifs au playbook
-    namespace_file: "{{ playbook_dir }}/namespace.yaml"
-    db_path: "{{ playbook_dir }}/database"
-    backend_path: "{{ playbook_dir }}/backend-souhir"
-    frontend_path: "{{ playbook_dir }}/frontend-souhir"
-    ingress_file: "{{ playbook_dir }}/ingress.yaml"
-
-    # Tag de l'image Docker passé depuis Jenkins
+    kubeconfig_path: "/var/lib/jenkins/.kube/config"
+    workspace: "/var/lib/jenkins/workspace/projet-fullstack"
+    db_path: "{{ workspace }}/database"
+    backend_path: "{{ workspace }}/backend-souhir"
+    frontend_path: "{{ workspace }}/frontend-souhir"
     image_tag: "{{ image_tag }}"
 
   tasks:
@@ -29,10 +24,10 @@
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
-        src: "{{ namespace_file }}"
+        src: "{{ workspace }}/namespace.yaml"
 
     ###################################
-    # Database
+    # Secret MySQL
     ###################################
     - name: Apply MySQL Secret
       kubernetes.core.k8s:
@@ -40,20 +35,41 @@
         state: present
         src: "{{ db_path }}/mysql-secret.yaml"
 
+    ###################################
+    # Storage MySQL (jamais supprimé)
+    ###################################
     - name: Apply MySQL Storage
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
         src: "{{ db_path }}/mysql-storage.yaml"
 
+    ###################################
+    # MySQL Deployment
+    ###################################
     - name: Apply MySQL Deployment
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
         src: "{{ db_path }}/mysql-deployment.yaml"
 
+    - name: Wait for MySQL to be ready
+      command: >
+        kubectl rollout status deployment/mysql
+        -n my-app --timeout=120s
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+      retries: 3
+      delay: 10
+      register: mysql_status
+      until: mysql_status.rc == 0
+
+    - name: Extra wait for MySQL initialization
+      pause:
+        seconds: 15
+
     ###################################
-    # Backend (avec image_tag)
+    # Backend (image_tag dynamique)
     ###################################
     - name: Deploy Backend
       kubernetes.core.k8s:
@@ -61,8 +77,19 @@
         state: present
         definition: "{{ lookup('template', backend_path + '/backenddeploy.yaml') }}"
 
+    - name: Wait for Backend to be ready
+      command: >
+        kubectl rollout status deployment/backend
+        -n my-app --timeout=120s
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+      retries: 3
+      delay: 10
+      register: backend_status
+      until: backend_status.rc == 0
+
     ###################################
-    # Frontend (avec image_tag)
+    # Frontend (image_tag dynamique)
     ###################################
     - name: Deploy Frontend
       kubernetes.core.k8s:
@@ -70,11 +97,31 @@
         state: present
         definition: "{{ lookup('template', frontend_path + '/frontdeploy.yaml') }}"
 
+    - name: Wait for Frontend to be ready
+      command: >
+        kubectl rollout status deployment/frontend
+        -n my-app --timeout=60s
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+
     ###################################
-    # Ingress
+    # Ingress (jamais supprimé)
     ###################################
     - name: Apply Ingress
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
-        src: "{{ ingress_file }}"
+        src: "{{ workspace }}/ingress.yaml"
+
+    ###################################
+    # Vérification finale
+    ###################################
+    - name: Get all pods status
+      command: kubectl get pods -n my-app
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
+      register: pods_output
+
+    - name: Print pods status
+      debug:
+        msg: "{{ pods_output.stdout }}"
