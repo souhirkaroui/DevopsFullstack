@@ -211,7 +211,7 @@ pipeline {
                 script {
                     try {
                         sh """
-                        ansible-playbook -i inventory.yaml deploymyapp.yaml -e image_tag=${BUILD_NUMBER}
+                        ansible-playbook -i inventory.yaml deploy-k8s.yaml -e image_tag=${BUILD_NUMBER}
                         """
                         notifyMail('Deploy to Kubernetes', 'SUCCESS')
                     } catch (err) {
