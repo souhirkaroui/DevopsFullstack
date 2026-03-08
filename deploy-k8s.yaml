@@ -120,7 +120,7 @@
     - name: Set image tag in frontend deployment
       replace:
         path: "{{ frontend_path }}/frontdeploy.yaml"
-        regexp: 'image:.frontend.'
+        regexp: 'image:.souhirks/frontend.'
         replace: "image: souhirks/frontend:{{ image_tag }}"
 
     - name: Deploy Frontend
@@ -131,7 +131,7 @@
 
     - name: Wait for Frontend to be ready
       command: >
-        kubectl rollout status deployment/frontend
+        kubectl rollout status deployment/front
         -n my-app --timeout=60s
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"
