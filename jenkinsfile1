@@ -71,43 +71,34 @@ pipeline {
             }
         }
 
-     /* ============================= SONARQUBE & QUALITY GATE BACKEND ================================== */
-stage('SonarQube & Quality Gate Backend') {
-    steps {
-        script {
-            try {
-                dir('backend-souhir') {
-                    withSonarQubeEnv('SonarQube') {
-                        withCredentials([string(credentialsId: 'sonar', variable: 'SONAR_TOKEN')]) {
-                            sh '''
-                                mvn clean package -DskipTests=true
-                                mvn sonar:sonar \
-                                -Dsonar.projectKey=backend \
-                                -Dsonar.login=$SONAR_TOKEN
-                            '''
-                        }
-                    }
+    /* ================= SONARQUBE + QUALITY GATE ================= */
+        stage('SonarQube & Quality Gate') {
+            steps {
+                script {
+                    try {
+                        withSonarQubeEnv('SonarQube') {
+                            withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                                            sh '''
+                                                     mvn clean package -DskipTests sonar:sonar \
+                                                     -Dsonar.projectKey=kubernetes \
+                                                     -Dsonar.login=$SONAR_TOKEN
+                                             '''
+                                  }
 
-                    // Attente du Quality Gate avec timeout
-                    timeout(time: 25, unit: 'MINUTES') {
-                        def qg = waitForQualityGate abortPipeline: true
-                        echo "Quality Gate Status (Backend): ${qg.status}"
-
-                        if (qg.status != 'OK') {
-                            notifyMail('SonarQube Backend', 'FAILED')
-                            error("Quality Gate FAILED for Backend")
-                        } else {
-                            notifyMail('SonarQube Backend', 'SUCCESS')
                         }
+
+                        timeout(time: 25, unit: 'MINUTES') {
+                            waitForQualityGate abortPipeline: true
+                        }
+
+                        notifyMail('SonarQube & Quality Gate', 'SUCCESS')
+                    } catch (err) {
+                        notifyMail('SonarQube & Quality Gate', 'FAILED')
+                        error("SonarQube & Quality Gate stage failed")
                     }
                 }
-            } catch (err) {
-                notifyMail('SonarQube Backend', 'FAILED')
-                error("SonarQube Backend stage failed: ${err}")
             }
         }
-    }
-}
 
 /* ============================= SONARQUBE & QUALITY GATE FRONTEND ================================== */
 stage('SonarQube & Quality Gate Frontend') {
