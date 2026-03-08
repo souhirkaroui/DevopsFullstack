@@ -130,13 +130,12 @@
         src: "{{ frontend_path }}/frontdeploy.yaml"
 
     ###################################
-    # Ingress (jamais supprimé)
+    # Ingress (corrigé)
     ###################################
     - name: Apply Ingress
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kubeconfig_path }}"
-        state: present
-        src: "{{ workspace }}/ingress.yaml"
+      command: kubectl apply -f {{ workspace }}/ingress.yaml
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
 
     ###################################
     # Vérification finale
