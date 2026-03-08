@@ -132,7 +132,7 @@
     - name: Wait for Frontend to be ready
       command: >
         kubectl rollout status deployment/front
-        -n my-app --timeout=60s
+        -n my-app --timeout=120s
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"
 
