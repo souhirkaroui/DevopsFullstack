@@ -1,4 +1,3 @@
----
 ############################################
 # STEP 1 - Copy files from Jenkins to Master
 ############################################
@@ -113,6 +112,15 @@
       delay: 10
       register: backend_status
       until: backend_status.rc == 0
+
+    ###################################
+    # Backend Service (Prometheus scrape)
+    ###################################
+    - name: Apply Backend Service
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        state: present
+        src: "{{ backend_path }}/serviceback.yaml"
 
     ###################################
     # Frontend (image_tag dynamique)
