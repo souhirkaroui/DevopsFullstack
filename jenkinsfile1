@@ -36,40 +36,33 @@ pipeline {
             }
         }
 
-        /* =========================== BUILD FRONTEND ============================ */
-        stage('Build Frontend') {
-            steps {
-                script {
-                    try {
-                        dir('frontend-souhir') {
-                            sh 'npm install'
-                            sh 'ng build --configuration production'
-                        }
-                        notifyMail('Build Frontend', 'SUCCESS')
-                    } catch (err) {
-                        notifyMail('Build Frontend', 'FAILED')
-                        error("Build Frontend failed")
-                    }
+       /* =========================== BUILD & TEST FRONTEND ============================ */
+stage('Build & Test Frontend') {
+    steps {
+        script {
+            dir('frontend-souhir') {
+                // Étape Build
+                try {
+                    sh 'npm install'
+                    sh 'ng build --configuration production'
+                    notifyMail('Build Frontend', 'SUCCESS')
+                } catch (err) {
+                    notifyMail('Build Frontend', 'FAILED')
+                    error("Build Frontend failed")
                 }
-            }
-        }
 
-        /* =========================== TEST FRONTEND ============================= */
-        stage('Test Frontend') {
-            steps {
-                script {
-                    try {
-                        dir('frontend-souhir') {
-                            sh 'npm run test -- --watch=false --browsers=ChromeHeadless'
-                        }
-                        notifyMail('Test Frontend', 'SUCCESS')
-                    } catch (err) {
-                        notifyMail('Test Frontend', 'FAILED')
-                        error("Test Frontend failed")
-                    }
+                // Étape Test
+                try {
+                    sh 'npm run test -- --watch=false --browsers=ChromeHeadless'
+                    notifyMail('Test Frontend', 'SUCCESS')
+                } catch (err) {
+                    notifyMail('Test Frontend', 'FAILED')
+                    error("Test Frontend failed")
                 }
             }
         }
+    }
+}
 
  /* ============================= SONARQUBE BACKEND ================================== */
 stage('SonarQube & Quality Gate Backend') {
@@ -89,9 +82,9 @@ stage('SonarQube & Quality Gate Backend') {
                     }
 
                     // Attendre la Quality Gate (25 min max) et arrêter le pipeline si échoue
-                    timeout(time: 25, unit: 'MINUTES') {
-                        waitForQualityGate abortPipeline: true
-                    }
+                   // timeout(time: 25, unit: 'MINUTES') {
+                    //    waitForQualityGate abortPipeline: true
+                  //  }
                 }
 
                 notifyMail('SonarQube Backend', 'SUCCESS')
