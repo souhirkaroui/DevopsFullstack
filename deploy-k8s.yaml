@@ -91,11 +91,17 @@
     ###################################
     # Backend (image_tag dynamique)
     ###################################
+    - name: Set image tag in backend deployment
+      replace:
+        path: "{{ backend_path }}/backenddeploy.yaml"
+        regexp: 'image:.backend.'
+        replace: "image: souhirks/backend:{{ image_tag }}"
+
     - name: Deploy Backend
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
-        definition: "{{ lookup('template', backend_path + '/backenddeploy.yaml') }}"
+        src: "{{ backend_path }}/backenddeploy.yaml"
 
     - name: Wait for Backend to be ready
       command: >
@@ -111,11 +117,17 @@
     ###################################
     # Frontend (image_tag dynamique)
     ###################################
+    - name: Set image tag in frontend deployment
+      replace:
+        path: "{{ frontend_path }}/frontdeploy.yaml"
+        regexp: 'image:.frontend.'
+        replace: "image: souhirks/frontend:{{ image_tag }}"
+
     - name: Deploy Frontend
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         state: present
-        definition: "{{ lookup('template', frontend_path + '/frontdeploy.yaml') }}"
+        src: "{{ frontend_path }}/frontdeploy.yaml"
 
     - name: Wait for Frontend to be ready
       command: >
