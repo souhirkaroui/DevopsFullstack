@@ -82,7 +82,7 @@ stage('SonarQube & Quality Gate Backend + Frontend') {
                         }
                     }
 
-                    // Quality Gate backend (sécurisé, continue même si erreur)
+                    // Quality Gate backend 
                     try {
                         timeout(time: 10, unit: 'MINUTES') {
                             def qg = waitForQualityGate()
@@ -109,7 +109,7 @@ stage('SonarQube & Quality Gate Backend + Frontend') {
                         }
                     }
 
-                    // Quality Gate frontend (sécurisé, continue même si erreur)
+                    // Quality Gate frontend 
                     try {
                         timeout(time: 10, unit: 'MINUTES') {
                             def qg = waitForQualityGate()
