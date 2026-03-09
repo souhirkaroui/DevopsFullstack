@@ -161,54 +161,38 @@ stage('SonarQube & Quality Gate Backend + Frontend') {
             }
         }
 
-        /* ======================= DOCKER FRONTEND via Ansible ================== */
-        stage('Docker Build & Push Frontend') {
-            steps {
-                script {
-                    try {
-                        withCredentials([usernamePassword(
-                            credentialsId: 'DockerHub',
-                            usernameVariable: 'DOCKER_USER',
-                            passwordVariable: 'DOCKER_PASS'
-                        )]) {
-                            sh '''
-                                ansible-playbook playbookfront.yaml \
-                                --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
-                            '''
-                        }
-                        notifyMail('Docker Build & Push Frontend', 'SUCCESS')
-                    } catch (err) {
-                        notifyMail('Docker Build & Push Frontend', 'FAILED')
-                        error("Frontend Docker build failed")
-                    }
+       /* ======================= DOCKER FRONTEND + BACKEND via Ansible ================== */
+stage('Docker Build & Push Frontend + Backend') {
+    steps {
+        script {
+            try {
+                withCredentials([usernamePassword(
+                    credentialsId: 'DockerHub',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+
+                    // ----------------- FRONTEND -----------------
+                    sh '''
+                        ansible-playbook playbookfront.yaml \
+                        --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
+                    '''
+                    notifyMail('Docker Build & Push Frontend', 'SUCCESS')
+
+                    // ----------------- BACKEND -----------------
+                    sh '''
+                        ansible-playbook playbookback.yaml \
+                        --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
+                    '''
+                    notifyMail('Docker Build & Push Backend', 'SUCCESS')
                 }
+            } catch (err) {
+                notifyMail('Docker Build & Push Frontend + Backend', 'FAILED')
+                error("Docker Build & Push Frontend + Backend stage failed")
             }
         }
-
-        /* ======================= DOCKER BACKEND via Ansible =================== */
-        stage('Docker Build & Push Backend') {
-            steps {
-                script {
-                    try {
-                        withCredentials([usernamePassword(
-                            credentialsId: 'DockerHub',
-                            usernameVariable: 'DOCKER_USER',
-                            passwordVariable: 'DOCKER_PASS'
-                        )]) {
-                            sh '''
-                                ansible-playbook playbookback.yaml \
-                                --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
-                            '''
-                        }
-                        notifyMail('Docker Build & Push Backend', 'SUCCESS')
-                    } catch (err) {
-                        notifyMail('Docker Build & Push Backend', 'FAILED')
-                        error("Backend Docker build failed")
-                    }
-                }
-            }
-        }
-
+    }
+}
         /* ======================= DEPLOY KUBERNETES via Ansible ================= */
         stage('Deploy to Kubernetes') {
             steps {
@@ -226,7 +210,7 @@ stage('SonarQube & Quality Gate Backend + Frontend') {
             }
         }
 
-    } // ✅ fin du bloc stages
+    } 
 
     /* ======================== POST PIPELINE ============================== */
     post {
