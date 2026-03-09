@@ -5,6 +5,12 @@ metadata:
   namespace: my-app
 spec:
   replicas: 1
+  revisionHistoryLimit: 2           # Ne garde que les 2 derniers ReplicaSets
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: backend
@@ -46,6 +52,6 @@ spec:
   selector:
     app: backend
   ports:
-    - port: 8080       # Port interne Kubernetes
-      targetPort: 8080 # Port du container
-  type: ClusterIP       # reste interne, Ingress fera le routage
+    - port: 8080
+      targetPort: 8080
+  type: ClusterIP
