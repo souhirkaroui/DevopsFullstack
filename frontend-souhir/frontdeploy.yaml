@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: front
-          image: souhirks/frontend:latest
+          image: souhirks/frontend:140
           ports:
             - containerPort: 80
           env:
