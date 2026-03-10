@@ -12,17 +12,18 @@ pipeline {
 
     stages {
 
-        /* ====================== BUILD & TEST BACKEND ======================= */
-        stage('Build & Test Backend') {
-            steps {
-                script {
+      /* ====================== BUILD & TEST BACKEND + FRONTEND ======================= */
+stage('Build & Test Backend + Frontend') {
+    steps {
+        script {
+            try {
+                // ----------------- BACKEND -----------------
+                dir('backend-souhir') {
                     try {
-                        dir('backend-souhir') {
-                            sh 'mvn clean package -DskipTests=true'
-                            notifyMail('Build Backend', 'SUCCESS')
-                            sh 'mvn test package -DskipTests=true'
-                            notifyMail('Test Backend', 'SUCCESS')
-                        }
+                        sh 'mvn clean package -DskipTests=true'
+                        notifyMail('Build Backend', 'SUCCESS')
+                        sh 'mvn test package -DskipTests=true'
+                        notifyMail('Test Backend', 'SUCCESS')
                     } catch (err) {
                         if (err.toString().contains('BUILD FAILURE')) {
                             notifyMail('Build Backend', 'FAILED')
@@ -33,37 +34,37 @@ pipeline {
                         }
                     }
                 }
-            }
-        }
 
-       /* =========================== BUILD & TEST FRONTEND ============================ */
-stage('Build & Test Frontend') {
-    steps {
-        script {
-            dir('frontend-souhir') {
-                // Étape Build
-                try {
-                    sh 'npm install'
-                    sh 'ng build --configuration production'
-                    notifyMail('Build Frontend', 'SUCCESS')
-                } catch (err) {
-                    notifyMail('Build Frontend', 'FAILED')
-                    error("Build Frontend failed")
+                // ----------------- FRONTEND -----------------
+                dir('frontend-souhir') {
+                    // Étape Build
+                    try {
+                        sh 'npm install'
+                        sh 'ng build --configuration production'
+                        notifyMail('Build Frontend', 'SUCCESS')
+                    } catch (err) {
+                        notifyMail('Build Frontend', 'FAILED')
+                        error("Build Frontend failed")
+                    }
+
+                    // Étape Test
+                    try {
+                        sh 'npm run test -- --watch=false --browsers=ChromeHeadless'
+                        notifyMail('Test Frontend', 'SUCCESS')
+                    } catch (err) {
+                        notifyMail('Test Frontend', 'FAILED')
+                        error("Test Frontend failed")
+                    }
                 }
 
-                // Étape Test
-                try {
-                    sh 'npm run test -- --watch=false --browsers=ChromeHeadless'
-                    notifyMail('Test Frontend', 'SUCCESS')
-                } catch (err) {
-                    notifyMail('Test Frontend', 'FAILED')
-                    error("Test Frontend failed")
-                }
+            } catch (err) {
+                // Si une erreur non gérée se produit dans le stage global
+                notifyMail('Build & Test Backend + Frontend', 'FAILED')
+                error("Build & Test Backend + Frontend stage failed")
             }
         }
     }
 }
-
 /* ============================= SONARQUBE BACKEND + FRONTEND + QUALITY GATE ================================== */
 stage('SonarQube & Quality Gate Backend + Frontend') {
     steps {
