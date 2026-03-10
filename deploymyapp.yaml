@@ -4,9 +4,11 @@
   become: true
   environment:
     KUBECONFIG: /var/lib/jenkins/.kube/config
+
   vars:
     kubeconfig_path: "/var/lib/jenkins/.kube/config"
     image_tag: "{{ image_tag }}"
+
   tasks:
 
     - name: Apply MySQL Secret
@@ -53,6 +55,12 @@
         state: present
         definition: "{{ lookup('template', 'k8s/deployment-backend.yaml') }}"
 
+    - name: Apply Backend Service (Prometheus metrics)
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        state: present
+        src: k8s/serviceback.yaml
+
     - name: Wait for Backend to be ready
       command: >
         kubectl rollout status deployment/backend --timeout=120s
@@ -82,7 +90,7 @@
         src: k8s/ingress.yaml
 
     - name: Get all pods status
-      command: kubectl get pods
+      command: kubectl get pods -A
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"
       register: pods_output
