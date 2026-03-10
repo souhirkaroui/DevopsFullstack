@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: backendservice
-  namespace: my-app        
+  namespace: my-app
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/port: "8080"
@@ -10,6 +10,6 @@ spec:
   selector:
     app: backend
   ports:
-    - port: 8080
+    - name: http
+      port: 8080
       targetPort: 8080
-      protocol: TCP
