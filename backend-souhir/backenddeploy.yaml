@@ -4,13 +4,13 @@ metadata:
   name: backend
   namespace: my-app
 spec:
-  replicas: 1
-  revisionHistoryLimit: 2
+  replicas: 1               # Nombre de pods à maintenir en fonctionnement
+  revisionHistoryLimit: 2    # Nombre de révisions conservées pour rollback
   strategy:
-    type: RollingUpdate
+    type: RollingUpdate       # Stratégie de mise à jour progressive
     rollingUpdate:
-      maxUnavailable: 0
-      maxSurge: 1
+      maxUnavailable: 0      # Aucun pod existant ne doit être indisponible pendant la mise à jour
+      maxSurge: 1           # Kubernetes peut créer 1 pod supplémentaire temporairement pendant la mise à jour
   selector:
     matchLabels:
       app: backend
@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: souhirks/backend:latest
+          image: souhirks/backend:v1
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
