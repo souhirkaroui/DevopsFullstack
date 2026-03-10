@@ -5,7 +5,7 @@
 
   vars:
     image_name: "{{ dockerhub_user }}/backend"
-    image_tag: "{{ lookup('env','BUILD_NUMBER') | default('v1') }}"
+    image_tag: "{{ lookup('env','BUILD_NUMBER') | default('latest') }}"
     project_path: "./backend-souhir"
     container_name: backend-container
 
