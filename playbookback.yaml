@@ -1,16 +1,18 @@
+---
 - name: Build and Push Backend Image
   hosts: localhost
   become: true
 
   vars:
     image_name: "{{ dockerhub_user }}/backend"
+    # Tag unique basé sur le BUILD_NUMBER, sinon 'latest'
     image_tag: "{{ lookup('env','BUILD_NUMBER') | default('latest') }}"
     project_path: "./backend-souhir"
     container_name: backend-container
 
   tasks:
 
-    - name: Stop and remove Backend container if exists
+    - name: Stop and remove backend container if it exists
       community.docker.docker_container:
         name: "{{ container_name }}"
         state: absent
@@ -26,9 +28,9 @@
         name: "{{ image_name }}"
         tag: "{{ image_tag }}"
         source: pull
-      ignore_errors: true   # au cas où l'image n'existe pas encore
+      ignore_errors: true   # continue même si l'image n'existe pas encore
 
-    - name: Build and push backend image
+    - name: Build backend image
       community.docker.docker_image:
         name: "{{ image_name }}"
         tag: "{{ image_tag }}"
@@ -38,7 +40,7 @@
           path: "{{ project_path }}"
         push: true
 
-    - name: Tag backend latest
+    - name: Tag backend image as latest
       community.docker.docker_image:
         name: "{{ image_name }}"
         tag: latest
