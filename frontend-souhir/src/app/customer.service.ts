@@ -14,7 +14,7 @@ export interface Customer {
 export class CustomerService {
 
   // URL complète vers le backend via Ingress
-  private apiUrl = '/api/customers';
+  private apiUrl = 'http://fullstack.ghazelatech.com/api/customers';
 
   constructor(private http: HttpClient) {}
 
