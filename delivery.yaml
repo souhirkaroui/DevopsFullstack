@@ -8,8 +8,8 @@
     docker_image_frontend: "souhirks/frontend"
     docker_image_backend:  "souhirks/backend"
     docker_image_tag:      "{{ IMAGE_TAG }}"
-    frontend_build_path:   /opt/Fullstackproject/frontend
-    backend_build_path:    /opt/Fullstackproject/backend
+    frontend_build_path: ./backend-souhir"
+    backend_build_path:  "./frontend-souhir"
 
   tasks:
 
