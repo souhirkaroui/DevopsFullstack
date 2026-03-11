@@ -5,7 +5,7 @@ metadata:
   namespace: my-app
 spec:
   replicas: 1
-  revisionHistoryLimit: 2           # Ne garde que les 2 derniers ReplicaSets
+  revisionHistoryLimit: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -21,7 +21,8 @@ spec:
     spec:
       containers:
         - name: front
-          image: souhirks/frontend:latest
+          image: souhirks/frontend:{{ BUILD_NUMBER | default('latest') }}
+          imagePullPolicy: Always
           ports:
             - containerPort: 80
           env:
@@ -29,7 +30,6 @@ spec:
               value: http://backend.my-app.svc.cluster.local:8080
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
