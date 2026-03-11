@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: souhirks/backend:{{ BUILD_NUMBER | default('latest') }}
+          image: souhirks/backend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
