@@ -21,13 +21,13 @@ spec:
     spec:
       containers:
         - name: backend
-          image: souhirks/backend:latest
+          image: souhirks/backend:{{ image_tag }}
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
             - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysqlsvc.my-app.svc.cluster.local:3306/mydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
+              value: "jdbc:mysql://mysqlsvc:3306/mydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC"
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
