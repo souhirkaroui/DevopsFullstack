@@ -113,14 +113,7 @@
       register: backend_status
       until: backend_status.rc == 0
 
-    ###################################
-    # Backend Service
-    ###################################
-    - name: Apply Backend Service
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kubeconfig_path }}"
-        state: present
-        src: "{{ backend_path }}/serviceback.yaml"
+   
 
     ###################################
     # Frontend Deployment
