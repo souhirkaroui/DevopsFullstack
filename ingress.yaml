@@ -21,7 +21,7 @@ spec:
             port:
               number: 8080
 
-      - path: /(.*)
+      - path: /
         pathType: ImplementationSpecific
         backend:
           service:
