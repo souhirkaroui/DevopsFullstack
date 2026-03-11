@@ -21,13 +21,13 @@ spec:
     spec:
       containers:
         - name: front
-          image: souhirks/frontend:{{ BUILD_NUMBER | default('latest') }}
+          image: souhirks/frontend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
           env:
             - name: BACKEND_URL
-              value: http://backend.my-app.svc.cluster.local:8080
+              value: http://backendsvc.my-app.svc.cluster.local:8080
 
 ---
 apiVersion: v1
