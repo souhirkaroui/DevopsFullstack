@@ -4,13 +4,13 @@ metadata:
   name: backend
   namespace: my-app
 spec:
-  replicas: 1               # Nombre de pods à maintenir en fonctionnement
-  revisionHistoryLimit: 2    # Nombre de révisions conservées pour rollback
+  replicas: 1
+  revisionHistoryLimit: 2
   strategy:
-    type: RollingUpdate       # Stratégie de mise à jour progressive
+    type: RollingUpdate
     rollingUpdate:
-      maxUnavailable: 0      # Aucun pod existant ne doit être indisponible pendant la mise à jour
-      maxSurge: 1           # Kubernetes peut créer 1 pod supplémentaire temporairement pendant la mise à jour
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: backend
@@ -21,13 +21,13 @@ spec:
     spec:
       containers:
         - name: backend
-          image: souhirks/backend:latest
+          image: souhirks/backend:{{ BUILD_NUMBER | default('latest') }}
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
           env:
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:mysql://mysqlsvc:3306/mydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+              value: jdbc:mysql://mysqlsvc.my-app.svc.cluster.local:3306/mydb?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -44,7 +44,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: backendsvc          # nom du service visible par Prometheus
+  name: backendsvc
   namespace: my-app
   annotations:
     prometheus.io/scrape: "true"
