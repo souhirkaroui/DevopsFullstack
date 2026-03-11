@@ -174,15 +174,15 @@ stage('Docker Build & Push Frontend + Backend') {
                 )]) {
 
                     // ----------------- FRONTEND -----------------
-                 //   sh '''
-                 //       ansible-playbook playbookfront.yaml \
-                 //       --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
-                 //   '''
-                  //  notifyMail('Docker Build & Push Frontend', 'SUCCESS')
+                     sh '''
+                          ansible-playbook playbookfront.yaml \
+                          --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
+                      '''
+                      notifyMail('Docker Build & Push Frontend', 'SUCCESS')
 
                     // ----------------- BACKEND -----------------
                     sh '''
-                        ansible-playbook delivery.yaml \
+                        ansible-playbook playbookback.yaml \
                         --extra-vars "dockerhub_user=$DOCKER_USER dockerhub_password=$DOCKER_PASS"
                     '''
                     notifyMail('Docker Build & Push Backend', 'SUCCESS')
