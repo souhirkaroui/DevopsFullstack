@@ -32,7 +32,7 @@
     db_path: "{{ workspace }}/database"
     backend_path: "{{ workspace }}/backend-souhir"
     frontend_path: "{{ workspace }}/frontend-souhir"
-    image_tag: "{{ image_tag }}"
+    image_tag: "{{ image_tag | default('latest') }}"
 
   tasks:
 
@@ -88,12 +88,12 @@
         seconds: 15
 
     ###################################
-    # Backend (image_tag dynamique)
+    # Backend Deployment
     ###################################
     - name: Set image tag in backend deployment
       replace:
         path: "{{ backend_path }}/backenddeploy.yaml"
-        regexp: 'image:.backend.'
+        regexp: 'image: souhirks/backend:.*'
         replace: "image: souhirks/backend:{{ image_tag }}"
 
     - name: Deploy Backend
@@ -114,20 +114,21 @@
       until: backend_status.rc == 0
 
     ###################################
-    # Backend Service (Prometheus scrape)
+    # Backend Service
     ###################################
     - name: Apply Backend Service
-      command: kubectl apply -f {{ workspace }}/serviceback.yaml
-      environment:
-        KUBECONFIG: "{{ kubeconfig_path }}"
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        state: present
+        src: "{{ backend_path }}/serviceback.yaml"
 
     ###################################
-    # Frontend (image_tag dynamique)
+    # Frontend Deployment
     ###################################
     - name: Set image tag in frontend deployment
       replace:
         path: "{{ frontend_path }}/frontdeploy.yaml"
-        regexp: 'image:.souhirks/frontend.'
+        regexp: 'image: souhirks/frontend:.*'
         replace: "image: souhirks/frontend:{{ image_tag }}"
 
     - name: Deploy Frontend
@@ -137,12 +138,13 @@
         src: "{{ frontend_path }}/frontdeploy.yaml"
 
     ###################################
-    # Ingress (corrigé)
+    # Ingress
     ###################################
     - name: Apply Ingress
-      command: kubectl apply -f {{ workspace }}/ingress.yaml
-      environment:
-        KUBECONFIG: "{{ kubeconfig_path }}"
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        state: present
+        src: "{{ workspace }}/ingress.yaml"
 
     ###################################
     # Vérification finale
