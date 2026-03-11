@@ -1,27 +1,30 @@
+# -------------------- Ingress pour exposer le frontend et rediriger le backend --------------------
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: myingress
-  namespace: my-app 
+  namespace: my-app
   annotations:
-    nginx.ingress.kubernetes.io/use-regex: "true"
+    kubernetes.io/ingress.class: "nginx"
+    
 spec:
-  ingressClassName: nginx
   rules:
-  - host: fullstack.ghazelatech.com
-    http:
-      paths:
-      - path: /api(/|$)(.*)
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: backendsvc
-            port:
-              number: 8080
-      - path: /
-        pathType: ImplementationSpecific
-        backend:
-          service:
-            name: frontsvc
-            port:
-              number: 80
+    - host: fullstack.ghazelatech.com
+      http:
+        paths:
+          # Angular frontend
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontsvc
+                port:
+                  number: 80
+          # API backend
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backendsvc
+                port:
+                  number: 8080
