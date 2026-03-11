@@ -1,27 +1,27 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: myingress
-  namespace: my-app
+  name: fullstack-ingress
   annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   ingressClassName: nginx
   rules:
-    - host: fullstack.ghazelatech.com
-      http:
-        paths:
-          - path: /api(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: backendsvc
-                port:
-                  number: 8080
-          - path: /(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: frontsvc
-                port:
-                  number: 80
+  - host: fullstack.ghazelatech.com
+    http:
+      paths:
+      - path: /api(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: backendsvc
+            port:
+              number: 8080
+      - path: /(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: frontsvc
+            port:
+              number: 80
