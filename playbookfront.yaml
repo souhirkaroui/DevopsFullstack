@@ -1,16 +1,18 @@
+---
 - name: Build and Push Frontend Image
   hosts: localhost
   become: true
 
   vars:
     image_name: "{{ dockerhub_user }}/frontend"
+    # Tag basé sur BUILD_NUMBER ou 'latest' par défaut
     image_tag: "{{ lookup('env','BUILD_NUMBER') | default('latest') }}"
     project_path: "./frontend-souhir"
     container_name: frontend-container
 
   tasks:
 
-    - name: Stop and remove Frontend container if exists
+    - name: Stop and remove frontend container if it exists
       community.docker.docker_container:
         name: "{{ container_name }}"
         state: absent
@@ -26,9 +28,9 @@
         name: "{{ image_name }}"
         tag: "{{ image_tag }}"
         source: pull
-      ignore_errors: true   # continue si l'image n'existe pas encore
+      ignore_errors: true   # continue même si l'image n'existe pas encore
 
-    - name: Build and push frontend image
+    - name: Build frontend image
       community.docker.docker_image:
         name: "{{ image_name }}"
         tag: "{{ image_tag }}"
@@ -38,7 +40,7 @@
           path: "{{ project_path }}"
         push: true
 
-    - name: Tag frontend latest
+    - name: Tag frontend image as latest
       community.docker.docker_image:
         name: "{{ image_name }}"
         tag: latest
